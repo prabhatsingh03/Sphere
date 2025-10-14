@@ -12,7 +12,6 @@ from flask import (
     send_file, session, flash
 )
 from werkzeug.utils import secure_filename
-from werkzeug.middleware.proxy_fix import ProxyFix
 from functools import wraps
 import pandas as pd
 import numpy as np
@@ -115,14 +114,6 @@ app = Flask(__name__)
 # Use HTTP scheme by default; production SSL should be handled by the reverse proxy (e.g., Lightsail/Load Balancer)
 app.config['PREFERRED_URL_SCHEME'] = 'http'
 
-# Honor X-Forwarded-* headers from reverse proxies (Lightsail LB / nginx)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
-
-# Allow overriding scheme via environment in production (set PREFERRED_URL_SCHEME=https)
-_env_scheme = os.getenv('PREFERRED_URL_SCHEME')
-if _env_scheme in ('http', 'https'):
-    app.config['PREFERRED_URL_SCHEME'] = _env_scheme
-
 # Generate a strong secret key if not provided via environment
 DEFAULT_SECRET_KEY = ''.join(secrets.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(64))
 SECRET_KEY = os.environ.get('SECRET_KEY', DEFAULT_SECRET_KEY)
@@ -142,46 +133,6 @@ def add_security_headers(response):
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     return response
-
-# ─── URL Helpers ───────────────────────────────────────────────────────────────
-def _normalize_base_url(raw_value: str) -> str:
-    """Normalize BASE_URL from env: remove backslashes, ensure scheme, and strip trailing slash."""
-    if not raw_value:
-        return ''
-    value = raw_value.strip()
-    # Replace any backslashes with forward slashes
-    value = value.replace('\\', '/')
-    # Remove accidental leading slashes
-    while value.startswith('/') and not value.startswith('//'):
-        value = value[1:]
-    # Ensure scheme exists; default to https
-    if not value.lower().startswith(('http://', 'https://')):
-        value = 'https://' + value
-    # Collapse multiple slashes after scheme
-    try:
-        from urllib.parse import urlsplit, urlunsplit
-        parts = urlsplit(value)
-        # Recompose with normalized path only
-        value = urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip('/'), parts.query, parts.fragment))
-    except Exception:
-        pass
-    return value.rstrip('/')
-
-BASE_URL = _normalize_base_url(os.environ.get('BASE_URL', ''))
-
-def absolute_url(endpoint, **values):
-    """Build absolute URL using normalized BASE_URL if provided; otherwise use Flask external URL."""
-    try:
-        path = url_for(endpoint, _external=False, **values)
-    except Exception:
-        return url_for(endpoint, _external=True, **values)
-    if BASE_URL:
-        try:
-            from urllib.parse import urljoin
-            return urljoin(BASE_URL + '/', path.lstrip('/'))
-        except Exception:
-            return f"{BASE_URL}{path}"
-    return url_for(endpoint, _external=True, **values)
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 # Load sensitive data from environment variables with fallbacks
@@ -2831,8 +2782,8 @@ def generate_form():
         # Don't fail the PO generation if vendor saving fails
 
     # Create approval URLs for first approver
-    approve_url_1 = absolute_url('approval_page', type='po', action='approve', id=new_po_number, role=first_approver)
-    reject_url_1 = absolute_url('approval_page', type='po', action='reject', id=new_po_number, role=first_approver)
+    approve_url_1 = url_for('approval_page', type='po', action='approve', id=new_po_number, role=first_approver, _external=True)
+    reject_url_1 = url_for('approval_page', type='po', action='reject', id=new_po_number, role=first_approver, _external=True)
     
     details_table = create_po_details_table(
         po_number=new_po_number, project_name=pr_row['Project Number'], pr_number=pr_number,
@@ -3056,8 +3007,8 @@ def process_po_approval(po, role, chain, df_po):
                 set_po_status("First Approval Complete - Pending Second Approval")
                 
                 # Create approval URLs for second approver first
-                approve_url_2 = absolute_url('approve_po', po=po, action='approve', role=second_info['role'])
-                reject_url_2 = absolute_url('approve_po', po=po, action='reject', role=second_info['role'])
+                approve_url_2 = url_for('approve_po', po=po, action='approve', role=second_info['role'], _external=True)
+                reject_url_2 = url_for('approve_po', po=po, action='reject', role=second_info['role'], _external=True)
                 
                 action_buttons = [
                     {"text": "✅ Approve", "url": approve_url_2, "color": "primary"}, 
@@ -3733,8 +3684,8 @@ def approve_po():
                 set_po_status("First Approval Complete - Pending Second Approval")
                 
                 # Create approval URLs for second approver
-                approve_url_2 = absolute_url('approval_page', type='po', action='approve', id=po, role=second_info['role'])
-                reject_url_2 = absolute_url('approval_page', type='po', action='reject', id=po, role=second_info['role'])
+                approve_url_2 = url_for('approval_page', type='po', action='approve', id=po, role=second_info['role'], _external=True)
+                reject_url_2 = url_for('approval_page', type='po', action='reject', id=po, role=second_info['role'], _external=True)
                 
                 # Get PO details for the email
                 po_row = df_po[df_po['PO Number'] == po].iloc[0]
@@ -4302,8 +4253,8 @@ def pr_requisition():
     dfp.to_excel(DATA_FILE, index=False)
     
     # Create external approval URLs (scheme will be derived by the client/proxy)
-    approve_url = absolute_url('approval_page', type='pr', action='approve', id=pr_number, role=next_approver_role)
-    reject_url = absolute_url('approval_page', type='pr', action='reject', id=pr_number, role=next_approver_role)
+    approve_url = url_for('approval_page', type='pr', action='approve', id=pr_number, role=next_approver_role, _external=True)
+    reject_url = url_for('approval_page', type='pr', action='reject', id=pr_number, role=next_approver_role, _external=True)
 
     content = f"""
       <p>A new Purchase Requisition has been submitted and requires your approval.</p>
@@ -5971,7 +5922,7 @@ def update_po():
                     
                     if first_approver and first_approver_email:
                         # Create approval URLs for first approver
-                        approve_url_1 = absolute_url('approval_page', type='po', action='approve', id=po_number, role=first_approver)
+                        approve_url_1 = url_for('approval_page', type='po', action='approve', id=po_number, role=first_approver, _external=True)
                         
                         # Create email content for updated PO
                         po_items = get_po_items_for_email(po_number)
