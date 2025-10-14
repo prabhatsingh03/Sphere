@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="form-container">
+  <h2>Download Vendor Items</h2>
+  <form method="POST">
+    <label for="vendor_code">Vendor Code</label>
+    <input id="vendor_code" name="vendor_code" required>
+    <button type="submit" class="btn-submit">Download Excel</button>
+  </form>
+</div>
+{% endblock %}

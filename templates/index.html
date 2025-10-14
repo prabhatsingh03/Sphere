@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - PO Management System{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+  <div class="hero-content">
+    <h1 class="hero-title">Supply Chain Management System</h1>
+    <p class="hero-subtitle">Streamline your procurement process with our comprehensive documentation and management platform</p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-number" style="color: #fff;">100%</div>
+        <div class="stat-label" style="color: #fff;">Digital</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" style="color: #fff;">24/7</div>
+        <div class="stat-label" style="color: #fff;">Available</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" style="color: #fff;">Secure</div>
+        <div class="stat-label" style="color: #fff;">Platform</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="services-section">
+  <div class="section-header">
+    <h2 class="section-title">System Modules</h2>
+    <p class="section-description">Access our comprehensive suite of procurement management tools</p>
+  </div>
+  
+  <div class="home-cards">
+    <a class="home-card" href="{{ url_for('po_system') }}">
+      <div class="card-icon">
+        <img src="{{ url_for('static', filename='po.png') }}" alt="PO Documentation">
+      </div>
+      <div class="card-content">
+        <h3 class="card-title">PO Documentation</h3>
+        <p class="card-description">Complete purchase order generation, management, and tracking system with automated workflows and approval processes.</p>
+        <div class="card-features">
+          <span class="feature-tag">Auto Generation</span>
+          <span class="feature-tag">Workflow Management</span>
+          <span class="feature-tag">Real-time Tracking</span>
+        </div>
+      </div>
+      <div class="card-arrow">
+        <i class="fas fa-arrow-right"></i>
+      </div>
+    </a>
+    
+    <a class="home-card" href="http://silnfa.zuarione.com/" target="_blank">
+      <div class="card-icon">
+        <img src="{{ url_for('static', filename='nfa.png') }}" alt="NFA Documentation">
+      </div>
+      <div class="card-content">
+        <h3 class="card-title">NFA Documentation</h3>
+        <p class="card-description">Comprehensive NFA (Need For Approval) number generation and management system for streamlined approval workflows.</p>
+        <div class="card-features">
+          <span class="feature-tag">Number Generation</span>
+          <span class="feature-tag">Approval Tracking</span>
+          <span class="feature-tag">External System</span>
+        </div>
+      </div>
+      <div class="card-arrow">
+        <i class="fas fa-external-link-alt"></i>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div class="features-section">
+  <div class="section-header">
+    <h2 class="section-title">Key Features</h2>
+    <p class="section-description">Powerful features designed to enhance your procurement workflow</p>
+  </div>
+  
+  <div class="features-grid">
+    <div class="feature-item">
+      <div class="feature-icon">
+        <i class="fas fa-file-alt"></i>
+      </div>
+      <h4 class="feature-title">Document Generation</h4>
+      <p class="feature-description">Automated document creation with customizable templates and professional formatting.</p>
+    </div>
+    
+    <div class="feature-item">
+      <div class="feature-icon">
+        <i class="fas fa-sitemap"></i>
+      </div>
+      <h4 class="feature-title">Approval Workflows</h4>
+      <p class="feature-description">Intelligent routing based on amount thresholds and department hierarchies.</p>
+    </div>
+    
+    <div class="feature-item">
+      <div class="feature-icon">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <h4 class="feature-title">Analytics Dashboard</h4>
+      <p class="feature-description">Real-time insights into procurement metrics, spending patterns, and vendor performance.</p>
+    </div>
+    
+    <div class="feature-item">
+      <div class="feature-icon">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <h4 class="feature-title">Secure & Compliant</h4>
+      <p class="feature-description">Enterprise-grade security with audit trails and compliance reporting.</p>
+    </div>
+    
+    <div class="feature-item">
+      <div class="feature-icon">
+        <i class="fas fa-bell"></i>
+      </div>
+      <h4 class="feature-title">Real-time Notifications</h4>
+      <p class="feature-description">Instant alerts for status changes, approvals, and important updates.</p>
+    </div>
+    
+    <div class="feature-item">
+      <div class="feature-icon">
+        <i class="fas fa-mobile-alt"></i>
+      </div>
+      <h4 class="feature-title">Mobile Responsive</h4>
+      <p class="feature-description">Access your procurement system from any device, anywhere, anytime.</p>
+    </div>
+  </div>
+</div>
+
+<div class="quick-actions-section">
+  <div class="section-header">
+    <h2 class="section-title">Quick Actions</h2>
+    <p class="section-description">Common tasks and frequently used features</p>
+  </div>
+  
+  <div class="quick-actions-grid">
+    <a href="{{ url_for('po_system') }}" class="quick-action">
+      <i class="fas fa-plus-circle"></i>
+      <span>Create New PO</span>
+    </a>
+    <a href="{{ url_for('po_system') }}" class="quick-action">
+      <i class="fas fa-search"></i>
+      <span>Check Status</span>
+    </a>
+    <a href="{{ url_for('po_system') }}" class="quick-action">
+      <i class="fas fa-upload"></i>
+      <span>Upload Document</span>
+    </a>
+    <a href="{{ url_for('po_system') }}" class="quick-action">
+      <i class="fas fa-chart-bar"></i>
+      <span>View Reports</span>
+    </a>
+  </div>
+</div>
+{% endblock %}

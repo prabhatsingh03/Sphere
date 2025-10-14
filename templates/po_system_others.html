@@ -1,0 +1,425 @@
+<div class="modal" id="modal-upload">
+  <div class="modal-content">
+    <span class="close" data-modal="modal-upload">&times;</span>
+    <h2>Upload PO Document</h2>
+    <form id="uploadPOForm" action="/upload_PO" method="POST" enctype="multipart/form-data" class="form-container">
+      <div class="form-group">
+        <label for="upload-po-number">PO Number</label>
+        <input id="upload-po-number" name="PO_number" type="text" required>
+      </div>
+      <div class="form-group">
+        <label for="upload-file">Select Document</label>
+        <input id="upload-file" name="file" type="file" required>
+      </div>
+      <button type="submit" class="btn-primary full-width mt-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 500; transition: all 0.3s ease;">Upload</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="modal-status">
+  <div class="modal-content">
+    <span class="close" data-modal="modal-status">&times;</span>
+    <div class="status-tabs" style="position:relative; display:flex; margin-bottom:1rem;">
+      <div class="status-slider"></div>
+
+      <button id="tab-status-pr" class="status-tab">Purchase Request</button>
+      <button id="tab-status-po" class="status-tab">Purchase Order</button>
+    </div>
+    <div id="status-pr-section" class="status-section">
+      <div class="form-group">
+        <label for="status-pr-number">Purchase Request Number</label>
+        <input id="status-pr-number" type="text" placeholder="e.g. ABC-01-PR-001">
+      </div>
+      <div id="status-pr-result" class="PO-display" style="margin-top:0.5rem;"></div>
+    </div>
+
+    <div id="status-po-section" class="status-section" style="display:none;">
+      <div class="form-group">
+        <label for="status-po-number">Purchase Order Number</label>
+        <input id="status-po-number" type="text" placeholder="e.g. 4700000001">
+      </div>
+      <div id="status-po-result" class="PO-display" style="margin-top:0.5rem;"></div>
+    </div>
+
+    <button id="check-status" class="btn-primary full-width" style="margin-top:1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 500; transition: all 0.3s ease;">
+      Check Status
+    </button>
+  </div>
+</div>
+
+
+<div class="modal" id="modal-retrieve">
+  <div class="modal-content">
+    <span class="close" data-modal="modal-retrieve">&times;</span>
+    <h2>Retrieve PO</h2>
+    <div id="retrieve_list" class="retrieve-list"></div>
+  </div>
+</div>
+
+
+<div class="modal" id="modal-replace">
+  <div class="modal-content">
+    <span class="close" data-modal="modal-replace">&times;</span>
+    <h2>Replace/Amend PO Document</h2>
+    <form id="replacePOForm" action="/replace_PO" method="POST" enctype="multipart/form-data" class="form-container">
+      <div class="form-group">
+        <label for="replace-po-number">PO Number</label>
+        <input id="replace-po-number" name="PO_number" type="text" required>
+      </div>
+      <div class="form-group">
+        <label for="replace-file">Select New Document</label>
+        <input id="replace-file" name="file" type="file" required>
+      </div>
+      <button type="submit" class="btn-primary full-width mt-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 500; transition: all 0.3s ease;">Replace</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="modal-pr">
+  <div class="modal-content modal-wide">
+    <span class="close" data-modal="modal-pr">&times;</span>
+    <div class="pr-container">
+      <aside class="pr-sidebar">
+        <nav>
+          <ul>
+            <li><a href="#" class="active">Generate PR</a></li>
+            <li><a href="#">Edit PRs</a></li>
+          </ul>
+        </nav>
+      </aside>
+      <section id="pr-section">
+        <!-- Generate PR Form -->
+        <div id="generate-pr-section">
+          <form id="PRForm" action="{{ url_for('pr_requisition') }}" method="post" enctype="multipart/form-data" class="pr-form">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="pr-heading">Initiate a New Purchase Request</h2>
+            <div class="flex items-center space-x-3">
+              <div id="pr-save-indicator" class="text-sm text-gray-500 hidden">
+                <i class="fas fa-save mr-1"></i>
+                <span>Auto-saved</span>
+              </div>
+              <button type="button" id="pr-clear-data" class="text-xs text-gray-400 hover:text-gray-600" title="Clear saved data">
+                <i class="fas fa-trash-alt mr-1"></i>
+                Clear
+              </button>
+            </div>
+          </div>
+          <div class="grid-2">
+            <fieldset class="project-fieldset form-group full-width">
+              <legend>Project Information</legend>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label for="pr-project-number">Select Existing Project Number</label>
+                  <select id="pr-project-number" name="project_number" required>
+                    <option value="" disabled selected>Select Project Number</option>
+                    {% for proj in projects %}
+                    <option value="{{ proj }}">{{ proj }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group" style="align-self: end;">
+                  <button type="button" class="btn-secondary" style="padding: var(--spacing-sm); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 500; transition: all 0.3s ease;" data-modal="modal-add-project">
+                    Add New Project
+                  </button>
+                </div>
+                 <div class="form-group">
+                    <label for="pr-project_name">Project Name</label>
+                    <input type="text" id="pr-project_name" name="pr-project_name" readonly>
+                </div>
+              </div>
+            </fieldset>
+
+            <div class="form-group">
+              <label for="pr-department">Requisition Department</label>
+              <select id="pr-department" name="department" required>
+                <option value="" disabled selected>Select department</option>
+                <option data-code="1" value="CEOs Office"> CEOs Office</option>
+                <option data-code="2" value="Engineering"> Engineering</option>
+                <option data-code="3" value="Site Team"> Site Team</option>
+                <option data-code="5" value="BD & Marketing"> BD &amp; Marketing</option>
+                <option data-code="6" value="Finance & Accounts"> Finance &amp; Accounts</option>
+                <option data-code="10" value="Quality">Quality</option>
+                <option data-code="11" value="Health, Environment & Safety">Health, Environment &amp; Safety</option>
+                <option data-code="12" value="IT">IT</option>
+                <option data-code="13" value="HR">HR</option>
+                <option data-code="14" value="Admin">Admin</option>
+                <option data-code="18" value="Process">Process</option>
+                <option data-code="19" value="Piping">Piping</option>
+                <option data-code="20" value="Mechanical Static">Mechanical Static</option>
+                <option data-code="21" value="Mechanical Rotary">Mechanical Rotary</option>
+                <option data-code="22" value="Civil & Structural">Civil &amp; Structural</option>
+                <option data-code="23" value="Electrical">Electrical</option>
+                <option data-code="24" value="Instrumentation">Instrumentation</option>
+                <option data-code="30" value="Document Control Center">Document Control Center</option>
+                <option data-code="34" value="Project Management">Project Management</option>
+                <option data-code="40" value="Procurement">Procurement</option>
+                <option data-code="41" value="Construction">Construction</option>
+                <option data-code="44" value="Legal & Contracts">Legal &amp; Contracts</option>
+                <option data-code="45" value="Outsourced Services">Outsourced Services</option>
+              </select>
+              <input type="hidden" id="pr-department-code" name="department_code" />
+            </div>
+            <div class="form-group">
+              <label for="pr-discipline">Discipline</label>
+              <select name="discipline" id="pr-discipline" required>
+                <option>Engineering</option>
+                <option>Procurement</option>
+                <option>Construction</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="pr-order-type">Type of Order</label>
+              <select name="order_type" id="pr-order-type" required>
+                <option value="" disabled selected>Select Order Type</option>
+                <option value="Material">Material</option>
+                <option value="Services">Services</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="pr-item-type">Type of Item</label>
+              <select name="item_type" id="pr-item-type" required>
+                <option value="" disabled selected>Select Item Type</option>
+                <option value="Budgeted">Budgeted</option>
+                <option value="Non-Budgeted">Non-Budgeted</option>
+              </select>
+            </div>
+            <div class="form-group">
+                <label for="pr-requester-role">Requester Role</label>
+                <select id="pr-requester-role" name="name" required>
+                    <option value="" disabled selected>Select Requester</option>
+                    <option value="Project Controller">Project Controller</option>
+                    <option value="Head of Project Planning & Control">Head of Project Planning & Control</option>
+                    <option value="CFO">CFO</option>
+                    <option value="CEO">CEO</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+              <label for="pr-email">Requester Email</label>
+              <input id="pr-email" name="requester_email" type="email" placeholder="user@adventz.com" required>
+            </div>
+            <div class="form-group">
+              <label for="pr-date">Date</label>
+              <input id="pr-date" name="date" value="{{ date_str }}" readonly>
+            </div>
+
+            <div class="form-group">
+              <label for="pr-expected-delivery">Expected Date of Delivery</label>
+              <input id="pr-expected-delivery" name="expected_delivery_date" type="date" required>
+            </div>
+
+            <div class="form-group">
+              <label for="pr-priority">Priority of PO</label>
+              <select id="pr-priority" name="priority_of_po" required>
+                <option value="" disabled selected>Select Priority</option>
+                <option value="Critical">Critical</option>
+                <option value="Non-Critical">Non-Critical</option>
+              </select>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="pr-num_items">Number of Items</label>
+              <input id="pr-num_items" name="number_of_items" type="number" min="1" value="1" required>
+            </div>
+            <div class="form-group-items full-width">
+              <div id="pr_items_container"></div>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="pr-material-file">Upload Material Requisition File</label>
+              <input id="pr-material-file" name="material_requisition_file" type="file" accept=".pdf,.doc,.docx" required>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary full-width mt-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 500; transition: all 0.3s ease;">Submit</button>
+        </form>
+        </div>
+
+        <!-- View PR Section -->
+        <div id="view-pr-section" style="display: none;">
+          <h2 class="pr-heading" style="margin-bottom: 20px;">View Rejected Purchase Requests</h2>
+          <p class="text-gray-600 mb-4">Only rejected PRs are shown here. Edit and resubmit for re-approval.</p>
+          <div id="pr-list-container">
+            <div class="text-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p class="text-gray-600">Loading PRs...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal" id="modal-add-project">
+  <div class="modal-content">
+    <span class="close" data-modal="modal-add-project">&times;</span>
+    <h2>Generate Project Number</h2>
+    <form id="addProjectForm" class="form-container">
+      <fieldset class="project-fieldset form-group full-width">
+        <legend>Project Number</legend>
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="add-project-code">Project Code</label>
+            <input id="add-project-code" name="project_code" type="text" readonly value="I">
+          </div>
+          <div class="form-group">
+            <label for="pr-clientcode">Client</label>
+            <select id="pr-clientcode" name="client_code" required>
+              <option value="" disabled selected>Select Client</option>
+              {% for client in clients %}
+              <option value="{{ client.code }}">{{ client.name }}</option>
+              {% endfor %}
+            </select>
+            <button type="button" id="add-client-btn" class="btn-secondary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-weight: 500; transition: all 0.3s ease;">
+              Add Client
+            </button>
+          </div>
+          <div class="form-group">
+            <label for="add-year">Year</label>
+            <input id="add-year" name="year" type="text" readonly value="{{ date_str[-2:] }}">
+          </div>
+          <div class="form-group">
+            <label for="add-sector">Sector</label>
+            <select id="add-sector" name="sector_code" required>
+              <option value="" disabled selected>Select Sector</option>
+              <option value="C">Chemicals</option>
+              <option value="F">Fertilizers</option>
+              <option value="P">Petrochemical</option>
+              <option value="O">Oil &amp; Gas</option>
+              <option value="E">Power</option>
+              <option value="G">General</option>
+            </select>
+          </div>
+      </fieldset>
+      <div class="form-group">
+        <label for="add-project-name">Project Name</label>
+        <input id="add-project-name" name="project_name" type="text" required placeholder="Enter Project Name">
+      </div>
+      <button type="submit" class="btn-primary full-width mt-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 500; transition: all 0.3s ease;">
+        Generate
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Edit PR Modal -->
+<div class="modal" id="modal-edit-pr">
+  <div class="modal-content modal-wide">
+    <span class="close" data-modal="modal-edit-pr">&times;</span>
+    <h2>Edit Purchase Request</h2>
+    <form id="edit-pr-form" class="pr-form">
+      <div class="grid-2">
+        <fieldset class="project-fieldset form-group full-width">
+          <legend>Project Information</legend>
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="edit-pr-project-number">Project Number</label>
+              <input type="text" id="edit-pr-project-number" name="project_number" readonly>
+            </div>
+            <div class="form-group">
+              <label for="edit-pr-project-name">Project Name</label>
+              <input type="text" id="edit-pr-project-name" name="project_name" readonly>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-group">
+          <label for="edit-pr-department">Requisition Department</label>
+          <select id="edit-pr-department" name="department" required>
+            <option value="" disabled selected>Select department</option>
+            <option data-code="1" value="CEOs Office"> CEOs Office</option>
+            <option data-code="2" value="Engineering"> Engineering</option>
+            <option data-code="3" value="Site Team"> Site Team</option>
+            <option data-code="5" value="BD & Marketing"> BD &amp; Marketing</option>
+            <option data-code="6" value="Finance & Accounts"> Finance &amp; Accounts</option>
+            <option data-code="10" value="Quality">Quality</option>
+            <option data-code="11" value="Health, Environment & Safety">Health, Environment &amp; Safety</option>
+            <option data-code="12" value="IT">IT</option>
+            <option data-code="13" value="HR">HR</option>
+            <option data-code="14" value="Admin">Admin</option>
+            <option data-code="18" value="Process">Process</option>
+            <option data-code="19" value="Piping">Piping</option>
+            <option data-code="20" value="Mechanical Static">Mechanical Static</option>
+            <option data-code="21" value="Mechanical Rotary">Mechanical Rotary</option>
+            <option data-code="22" value="Civil & Structural">Civil &amp; Structural</option>
+            <option data-code="23" value="Electrical">Electrical</option>
+            <option data-code="24" value="Instrumentation">Instrumentation</option>
+            <option data-code="30" value="Document Control Center">Document Control Center</option>
+            <option data-code="34" value="Project Management">Project Management</option>
+            <option data-code="40" value="Procurement">Procurement</option>
+            <option data-code="41" value="Construction">Construction</option>
+            <option data-code="44" value="Legal & Contracts">Legal &amp; Contracts</option>
+            <option data-code="45" value="Outsourced Services">Outsourced Services</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="edit-pr-discipline">Discipline</label>
+          <select name="discipline" id="edit-pr-discipline" required>
+            <option>Engineering</option>
+            <option>Procurement</option>
+            <option>Construction</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="edit-pr-order-type">Type of Order</label>
+          <select name="order_type" id="edit-pr-order-type" required>
+            <option value="" disabled selected>Select Order Type</option>
+            <option value="Material">Material</option>
+            <option value="Services">Services</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="edit-pr-requester-role">Requester Role</label>
+          <select id="edit-pr-requester-role" name="name" required>
+            <option value="" disabled selected>Select Requester</option>
+            <option value="Project Controller">Project Controller</option>
+            <option value="Head of Project Planning & Control">Head of Project Planning & Control</option>
+            <option value="CFO">CFO</option>
+            <option value="CEO">CEO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="edit-pr-email">Requester Email</label>
+          <input id="edit-pr-email" name="requester_email" type="email" placeholder="user@adventz.com" required>
+        </div>
+        <div class="form-group">
+          <label for="edit-pr-date">Date</label>
+          <input id="edit-pr-date" name="date" readonly>
+        </div>
+        <div class="form-group">
+          <label for="edit-pr-expected-delivery">Expected Date of Delivery</label>
+          <input id="edit-pr-expected-delivery" name="expected_delivery_date" type="date" required>
+        </div>
+        <div class="form-group">
+          <label for="edit-pr-priority">Priority of PO</label>
+          <select id="edit-pr-priority" name="priority_of_po" required>
+            <option value="" disabled selected>Select Priority</option>
+            <option value="Critical">Critical</option>
+            <option value="Non-Critical">Non-Critical</option>
+          </select>
+        </div>
+        <div class="form-group full-width">
+          <label for="edit-pr-num-items">Number of Items</label>
+          <input id="edit-pr-num-items" name="number_of_items" type="number" min="1" value="1" required>
+        </div>
+        <div class="form-group-items full-width">
+          <div id="edit-pr-items-container"></div>
+        </div>
+        <div class="form-group full-width">
+          <label for="edit-pr-material-file">Current Material Requisition File</label>
+          <input id="edit-pr-material-file" name="current_material_file" type="text" readonly>
+        </div>
+        <div class="form-group full-width">
+          <label for="edit-pr-material-file-new">Update Material Requisition File (Optional)</label>
+          <input id="edit-pr-material-file-new" name="material_requisition_file" type="file" accept=".pdf,.doc,.docx">
+          <small class="text-gray-600">Leave empty to keep current file</small>
+        </div>
+      </div>
+      <div class="flex gap-4 mt-6">
+        <button type="submit" class="btn-primary flex-1" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 500; transition: all 0.3s ease;">Update PR</button>
+        <button type="button" class="btn-secondary flex-1" data-modal="modal-edit-pr" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 500; transition: all 0.3s ease;">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Admin Credentials - Adventz ERP System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="bg-blue-600 px-6 py-4">
+                <h1 class="text-white text-xl font-semibold">
+                    <i class="fas fa-user-shield mr-2"></i>
+                    Update Admin Credentials
+                </h1>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-6">
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800">
+                                    Important Notice
+                                </h3>
+                                <div class="mt-2 text-sm text-yellow-700">
+                                    <p>This will update the admin user credentials in the database using the values from your <code class="bg-yellow-100 px-1 rounded">.env</code> file.</p>
+                                    <p class="mt-2">Make sure your <code class="bg-yellow-100 px-1 rounded">.env</code> file contains:</p>
+                                    <ul class="mt-1 list-disc list-inside">
+                                        <li><code class="bg-yellow-100 px-1 rounded">ADMIN_EMAIL=your_new_email@company.com</code></li>
+                                        <li><code class="bg-yellow-100 px-1 rounded">ADMIN_PASSWORD=your_new_password</code></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-3">Current Environment Variables</h3>
+                    <div class="bg-gray-50 rounded-md p-4 space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-sm font-medium text-gray-700">ADMIN_EMAIL:</span>
+                            <span class="text-sm text-gray-900" id="current-email">Loading...</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm font-medium text-gray-700">ADMIN_PASSWORD:</span>
+                            <span class="text-sm text-gray-900" id="current-password">••••••••</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <button type="button" id="check-env-btn" 
+                            class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
+                        <i class="fas fa-search mr-2"></i>
+                        Check Environment Variables
+                    </button>
+                    
+                    <button type="button" id="update-btn" 
+                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Update Admin Credentials
+                    </button>
+                    
+                    <a href="/login" 
+                       class="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors inline-block text-center">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Login
+                    </a>
+                </div>
+
+                <div id="result" class="mt-6 hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateBtn = document.getElementById('update-btn');
+            const checkEnvBtn = document.getElementById('check-env-btn');
+            const resultDiv = document.getElementById('result');
+            const currentEmail = document.getElementById('current-email');
+            const currentPassword = document.getElementById('current-password');
+
+            // Load current environment variables
+            fetch('/api/admin_env_vars')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        currentEmail.textContent = data.email || 'Not set';
+                        currentPassword.textContent = data.password ? '••••••••' : 'Not set';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading environment variables:', error);
+                    currentEmail.textContent = 'Error loading';
+                    currentPassword.textContent = 'Error loading';
+                });
+
+            // Check environment variables button
+            checkEnvBtn.addEventListener('click', function() {
+                checkEnvBtn.disabled = true;
+                checkEnvBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Checking...';
+
+                fetch('/api/check_and_sync_env', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    resultDiv.className = `mt-6 p-4 rounded-md ${data.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`;
+                    resultDiv.innerHTML = `
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas ${data.success ? 'fa-check-circle text-green-400' : 'fa-exclamation-circle text-red-400'}"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium ${data.success ? 'text-green-800' : 'text-red-800'}">
+                                    ${data.success ? 'Success' : 'Error'}
+                                </h3>
+                                <div class="mt-2 text-sm ${data.success ? 'text-green-700' : 'text-red-700'}">
+                                    <p>${data.message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    resultDiv.classList.remove('hidden');
+
+                    if (data.success) {
+                        // Reload environment variables display
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultDiv.className = 'mt-6 p-4 rounded-md bg-red-50 border border-red-200';
+                    resultDiv.innerHTML = `
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">Error</h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <p>An error occurred while checking environment variables.</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    resultDiv.classList.remove('hidden');
+                })
+                .finally(() => {
+                    checkEnvBtn.disabled = false;
+                    checkEnvBtn.innerHTML = '<i class="fas fa-search mr-2"></i>Check Environment Variables';
+                });
+            });
+
+            updateBtn.addEventListener('click', function() {
+                updateBtn.disabled = true;
+                updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
+
+                fetch('/update_admin_credentials', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    resultDiv.className = `mt-6 p-4 rounded-md ${data.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`;
+                    resultDiv.innerHTML = `
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas ${data.success ? 'fa-check-circle text-green-400' : 'fa-exclamation-circle text-red-400'}"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium ${data.success ? 'text-green-800' : 'text-red-800'}">
+                                    ${data.success ? 'Success' : 'Error'}
+                                </h3>
+                                <div class="mt-2 text-sm ${data.success ? 'text-green-700' : 'text-red-700'}">
+                                    <p>${data.message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    resultDiv.classList.remove('hidden');
+
+                    if (data.success) {
+                        // Update the display
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultDiv.className = 'mt-6 p-4 rounded-md bg-red-50 border border-red-200';
+                    resultDiv.innerHTML = `
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">Error</h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <p>An error occurred while updating credentials.</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    resultDiv.classList.remove('hidden');
+                })
+                .finally(() => {
+                    updateBtn.disabled = false;
+                    updateBtn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i>Update Admin Credentials';
+                });
+                                });
+                });
+
+                // Auto-check environment variables every 30 seconds
+                setInterval(function() {
+                    console.log('Auto-checking environment variables...');
+                    fetch('/api/check_and_sync_env', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Environment variables synced automatically');
+                            // Update display if credentials changed
+                            location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Auto-check error:', error);
+                    });
+                }, 30000); // 30 seconds
+            </script>
+        </body>
+        </html>

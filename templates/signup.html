@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Adventz ERP System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="bg-blue-600 px-6 py-4">
+                <h1 class="text-white text-xl font-semibold">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Create Account
+                </h1>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-6">
+                    <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-blue-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">
+                                    Account Creation
+                                </h3>
+                                <div class="mt-2 text-sm text-blue-700">
+                                    <p>Your account will be created and sent for admin approval. You will be notified once approved.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="signupForm" class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-user mr-2"></i>Username
+                        </label>
+                        <input type="text" id="username" name="username" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter username">
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-envelope mr-2"></i>Email
+                        </label>
+                        <input type="email" id="email" name="email" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter email address">
+                    </div>
+
+                    <div>
+                        <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-id-card mr-2"></i>Full Name
+                        </label>
+                        <input type="text" id="full_name" name="full_name" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter your full name">
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-lock mr-2"></i>Password
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="password" name="password" required
+                                   class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Enter password">
+                            <button type="button" id="togglePassword" 
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-lock mr-2"></i>Confirm Password
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="confirm_password" name="confirm_password" required
+                                   class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Confirm your password">
+                            <button type="button" id="toggleConfirmPassword" 
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="signup-btn"
+                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Create Account
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-600">
+                        Already have an account? 
+                        <a href="/login" class="text-blue-600 hover:text-blue-500 font-medium">Sign in here</a>
+                    </p>
+                </div>
+
+                <div id="result" class="mt-6 hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const signupForm = document.getElementById('signupForm');
+            const signupBtn = document.getElementById('signup-btn');
+            const resultDiv = document.getElementById('result');
+            const togglePassword = document.getElementById('togglePassword');
+            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirm_password');
+
+            // Password visibility toggle
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePassword.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+
+            toggleConfirmPassword.addEventListener('click', function() {
+                const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                confirmPasswordInput.setAttribute('type', type);
+                toggleConfirmPassword.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+
+            signupForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(signupForm);
+                const data = {
+                    username: formData.get('username'),
+                    email: formData.get('email'),
+                    full_name: formData.get('full_name'),
+                    password: formData.get('password'),
+                    confirm_password: formData.get('confirm_password')
+                };
+
+                // Validation
+                if (data.password !== data.confirm_password) {
+                    showResult('Passwords do not match', false);
+                    return;
+                }
+
+                if (data.password.length < 6) {
+                    showResult('Password must be at least 6 characters long', false);
+                    return;
+                }
+
+                // Submit form
+                signupBtn.disabled = true;
+                signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating Account...';
+
+                fetch('/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showResult(data.message, true);
+                        signupForm.reset();
+                        // Redirect to login after 3 seconds
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 3000);
+                    } else {
+                        showResult(data.message, false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showResult('An error occurred while creating account', false);
+                })
+                .finally(() => {
+                    signupBtn.disabled = false;
+                    signupBtn.innerHTML = '<i class="fas fa-user-plus mr-2"></i>Create Account';
+                });
+            });
+
+            function showResult(message, isSuccess) {
+                resultDiv.className = `mt-6 p-4 rounded-md ${isSuccess ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`;
+                resultDiv.innerHTML = `
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas ${isSuccess ? 'fa-check-circle text-green-400' : 'fa-exclamation-circle text-red-400'}"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium ${isSuccess ? 'text-green-800' : 'text-red-800'}">
+                                ${isSuccess ? 'Success' : 'Error'}
+                            </h3>
+                            <div class="mt-2 text-sm ${isSuccess ? 'text-green-700' : 'text-red-700'}">
+                                <p>${message}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                resultDiv.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

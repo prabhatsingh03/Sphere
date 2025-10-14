@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Adventz ERP System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        .approval-flow {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Header -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-building text-2xl"></i>
+                    <h1 class="text-xl font-bold">SPHERE</h1>
+                    <p class="text-xs text-slate-100 font-medium hidden sm:block">Smart Platform for Harmonized E-Procurement & Resource Exchange</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/po_system" class="hover:text-gray-200 transition-colors">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="/logout" class="hover:text-gray-200 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Page Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-book-open text-blue-600 mr-3"></i>
+                System Documentation
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Comprehensive guide to the Purchase Order approval hierarchy, user permissions, and workflow processes
+            </p>
+        </div>
+
+        <!-- Approval Hierarchy Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8 card-shadow">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-sitemap text-blue-600 mr-3"></i>
+                Purchase Order Approval Hierarchy
+            </h2>
+            
+            <div class="table-container">
+                <table class="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden">
+                                         <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                         <tr>
+                             <th class="px-6 py-4 text-left font-semibold text-lg">Discipline</th>
+                             <th class="px-6 py-4 text-left font-semibold text-lg">Amount Range</th>
+                             <th class="px-6 py-4 text-left font-semibold text-lg">Requestor</th>
+                             <th class="px-6 py-4 text-left font-semibold text-lg">First Approver</th>
+                             <th class="px-6 py-4 text-left font-semibold text-lg">Second Approver</th>
+                             <th class="px-6 py-4 text-left font-semibold text-lg">Workflow</th>
+                         </tr>
+                     </thead>
+                                         <tbody class="divide-y divide-gray-200">
+                         <!-- Engineering Discipline -->
+                         <tr class="hover:bg-gray-50 transition-colors">
+                             <td class="px-6 py-4 font-semibold text-gray-800">
+                                 <i class="fas fa-cogs text-blue-600 mr-2"></i>
+                                 Engineering
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     &lt; ₹10 Lakh
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     HPPC, Head of Engineering
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     Head of Procurement
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     CFO
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-sm text-gray-600">
+                                     Two-stage approval required
+                                 </span>
+                             </td>
+                         </tr>
+                         <tr class="hover:bg-gray-50 transition-colors">
+                             <td class="px-6 py-4 font-semibold text-gray-800">
+                                 <i class="fas fa-cogs text-blue-600 mr-2"></i>
+                                 Engineering
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     ₹10 Lakh - ₹10 Crore
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     Head of Engineering, CFO
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     CEO
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-gray-400 italic">None</span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-sm text-gray-600">
+                                     Single-stage approval
+                                 </span>
+                             </td>
+                         </tr>
+                         <tr class="hover:bg-gray-50 transition-colors">
+                             <td class="px-6 py-4 font-semibold text-gray-800">
+                                 <i class="fas fa-cogs text-blue-600 mr-2"></i>
+                                 Engineering
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     ≥ ₹10 Crore
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     CEO, CFO
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     Chairman
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-gray-400 italic">None</span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-sm text-gray-600">
+                                     Single-stage approval
+                                 </span>
+                             </td>
+                         </tr>
+                         
+                         <!-- Procurement Discipline -->
+                         <tr class="hover:bg-gray-50 transition-colors">
+                             <td class="px-6 py-4 font-semibold text-gray-800">
+                                 <i class="fas fa-shopping-cart text-green-600 mr-2"></i>
+                                 Procurement
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     &lt; ₹25 Lakh
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     HPPC, Site Head Mechanical
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     Head of Procurement
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     CFO
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-sm text-gray-600">
+                                     Two-stage approval required
+                                 </span>
+                             </td>
+                         </tr>
+                         <tr class="hover:bg-gray-50 transition-colors">
+                             <td class="px-6 py-4 font-semibold text-gray-800">
+                                 <i class="fas fa-shopping-cart text-green-600 mr-2"></i>
+                                 Procurement
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     ≥ ₹25 Lakh
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     Head of Procurement, CFO
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     CEO
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-gray-400 italic">None</span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-sm text-gray-600">
+                                     Single-stage approval
+                                 </span>
+                             </td>
+                         </tr>
+                         
+                         <!-- Construction Discipline -->
+                         <tr class="hover:bg-gray-50 transition-colors">
+                             <td class="px-6 py-4 font-semibold text-gray-800">
+                                 <i class="fas fa-hard-hat text-orange-600 mr-2"></i>
+                                 Construction
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     &lt; ₹1 Lakh
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     HPPC, Head of Engineering
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     Head of Procurement
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-gray-400 italic">None</span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-sm text-gray-600">
+                                     Single-stage approval
+                                 </span>
+                             </td>
+                         </tr>
+                         <tr class="hover:bg-gray-50 transition-colors">
+                             <td class="px-6 py-4 font-semibold text-gray-800">
+                                 <i class="fas fa-hard-hat text-orange-600 mr-2"></i>
+                                 Construction
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     ₹1 Lakh - ₹10 Lakh
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     HPPC, Head of Engineering
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     Head of Procurement
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     CFO
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-sm text-gray-600">
+                                     Two-stage approval required
+                                 </span>
+                             </td>
+                         </tr>
+                         <tr class="hover:bg-gray-50 transition-colors">
+                             <td class="px-6 py-4 font-semibold text-gray-800">
+                                 <i class="fas fa-hard-hat text-orange-600 mr-2"></i>
+                                 Construction
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     ₹10 Lakh - ₹25 Crore
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     CFO, Head of Procurement
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     CEO
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-gray-400 italic">None</span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-sm text-gray-600">
+                                     Single-stage approval
+                                 </span>
+                             </td>
+                         </tr>
+                         <tr class="hover:bg-gray-50 transition-colors">
+                             <td class="px-6 py-4 font-semibold text-gray-800">
+                                 <i class="fas fa-hard-hat text-orange-600 mr-2"></i>
+                                 Construction
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     ≥ ₹25 Crore
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     CFO, CEO
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                                     Chairman
+                                 </span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-gray-400 italic">None</span>
+                             </td>
+                             <td class="px-6 py-4">
+                                 <span class="text-sm text-gray-600">
+                                     Single-stage approval
+                                 </span>
+                             </td>
+                         </tr>
+                     </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- User Permissions Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8 card-shadow">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-user-shield text-green-600 mr-3"></i>
+                User Permissions & Roles
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Admin Role -->
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 border border-purple-200">
+                    <h3 class="text-xl font-bold text-purple-800 mb-4 flex items-center">
+                        <i class="fas fa-crown text-purple-600 mr-2"></i>
+                        Admin Role
+                    </h3>
+                    <ul class="space-y-2 text-purple-700">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            Full system access
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            User management & configuration
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            All approval permissions
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            System configuration
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Regular User Permissions -->
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
+                        <i class="fas fa-user text-blue-600 mr-2"></i>
+                        Regular User Permissions
+                    </h3>
+                    <ul class="space-y-2 text-blue-700">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            Purchase Requisition creation
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            Purchase Order generation
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            Status checking & tracking
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            Document upload & retrieval
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Process Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8 card-shadow">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-project-diagram text-indigo-600 mr-3"></i>
+                Complete Workflow Process
+            </h2>
+            
+            <div class="approval-flow rounded-lg p-6">
+                <div class="grid md:grid-cols-4 gap-6">
+                    <!-- Step 1 -->
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <span class="text-white text-xl font-bold">1</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Create PR</h3>
+                        <p class="text-sm text-gray-600">User creates Purchase Requisition with project details, items, and budget</p>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <span class="text-white text-xl font-bold">2</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Generate PO</h3>
+                        <p class="text-sm text-gray-600">System generates Purchase Order based on PR and sends to first approver</p>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <span class="text-white text-xl font-bold">3</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mb-2">First Approval</h3>
+                        <p class="text-sm text-gray-600">Head of Procurement reviews and approves/rejects the PO</p>
+                    </div>
+                    
+                    <!-- Step 4 -->
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <span class="text-white text-xl font-bold">4</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Final Approval</h3>
+                        <p class="text-sm text-gray-600">CFO provides final approval (if required) and PO is ready for execution</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Features Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8 card-shadow">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-star text-yellow-600 mr-3"></i>
+                Key System Features
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
+                    <i class="fas fa-envelope text-4xl text-green-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-green-800 mb-2">Email Notifications</h3>
+                    <p class="text-sm text-green-700">Automatic email notifications at every stage with direct approval/rejection links</p>
+                </div>
+                
+                <div class="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                    <i class="fas fa-chart-line text-4xl text-blue-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2">Real-time Tracking</h3>
+                    <p class="text-sm text-blue-700">Live dashboard with charts, statistics, and real-time status updates</p>
+                </div>
+                
+                <div class="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                    <i class="fas fa-shield-alt text-4xl text-purple-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-purple-800 mb-2">Role-based Access</h3>
+                    <p class="text-sm text-purple-700">Secure access control with granular permissions for different user roles</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Dashboard -->
+        <div class="text-center">
+            <a href="/po_system" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                <i class="fas fa-arrow-left mr-3"></i>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white/80 backdrop-blur-lg border-t border-slate-200/60 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-md flex items-center justify-center">
+                        <i class="fas fa-building text-white text-xs"></i>
+                    </div>
+                    <p class="text-sm text-slate-600 font-medium">&copy; 2025 Simon India Limited. All rights reserved.</p>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="/documentation" class="text-sm text-slate-500 hover:text-blue-600 transition-colors duration-200 font-medium">
+                        Documentation
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

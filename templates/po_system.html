@@ -1,0 +1,1004 @@
+{% extends 'base.html' %}
+
+{% block title %}PO System - Purchase Order Management{% endblock %}
+
+{% block notifications %}
+<div class="relative">
+  <button id="notificationBtn" class="relative p-1.5 sm:p-2 text-slate-600 hover:text-primary-600 transition-colors duration-200 animate-fade-in">
+    <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-slate-100 to-slate-200 hover:from-primary-50 hover:to-primary-100 rounded-lg flex items-center justify-center transition-all duration-300 hover:shadow-md">
+      <i class="fas fa-bell text-xs sm:text-sm"></i>
+    </div>
+    <span id="notifCount" class="absolute -top-1 -right-1 min-w-[16px] sm:min-w-[20px] h-4 sm:h-5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse-glow">0</span>
+  </button>
+  <div id="notificationDropdown" class="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50 opacity-0 invisible transition-all duration-300 transform translate-y-2">
+    <div class="p-3 sm:p-4 border-b border-slate-100">
+      <h3 class="text-sm font-semibold text-slate-700">Notifications</h3>
+    </div>
+    <ul id="notificationsList" class="max-h-56 sm:max-h-64 overflow-y-auto"></ul>
+    <div class="p-2 sm:p-3 border-t border-slate-100 text-center">
+      <button class="text-xs text-primary-600 hover:text-primary-700 font-medium">View All</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block mobile_notifications %}
+<div class="w-full">
+  <button id="mobileNotificationBtn" class="w-full flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl border border-slate-200 hover:shadow-md transition-all duration-300">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center text-white shadow-lg">
+        <i class="fas fa-bell text-sm"></i>
+      </div>
+      <span class="text-sm font-semibold text-slate-700">Notifications</span>
+    </div>
+    <span id="mobileNotifCount" class="min-w-[20px] h-5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center">0</span>
+  </button>
+  <div id="mobileNotificationList" class="mt-3 space-y-2 hidden">
+    <ul id="mobileNotificationsList" class="space-y-2 max-h-48 overflow-y-auto"></ul>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="relative overflow-hidden bg-gradient-to-br from-white to-slate-50 rounded-xl sm:rounded-2xl border border-slate-200 shadow-lg mb-6 sm:mb-8 animate-fade-in">
+  <div class="absolute top-0 right-0 w-32 h-32 sm:w-64 sm:h-64 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full opacity-20 transform translate-x-16 sm:translate-x-32 -translate-y-16 sm:-translate-y-32"></div>
+  <div class="relative p-4 sm:p-6 lg:p-8">
+    <div class="max-w-3xl">
+      <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent mb-3 sm:mb-4 animate-slide-up leading-tight">
+        Supply Chain Management System
+      </h1>
+      <p class="text-sm sm:text-base lg:text-lg text-slate-600 leading-relaxed animate-slide-up" style="animation-delay: 0.1s;">
+        Comprehensive procurement workflow management and documentation with automated approvals and real-time tracking
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+  <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-300 group animate-bounce-in" style="animation-delay: 0.1s;">
+    <div class="flex items-center justify-between mb-3 sm:mb-4">
+      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+        <i class="fas fa-file-invoice text-sm sm:text-lg"></i>
+      </div>
+      <div class="text-right">
+        <div class="text-xl sm:text-2xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors duration-300" id="total-pos">-</div>
+        <div class="text-xs sm:text-sm text-slate-500 font-medium">Total POs</div>
+      </div>
+    </div>
+    <div class="w-full bg-slate-100 rounded-full h-1.5 sm:h-2">
+      <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-1.5 sm:h-2 rounded-full" style="width: 75%"></div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-300 group animate-bounce-in" style="animation-delay: 0.2s;">
+    <div class="flex items-center justify-between mb-3 sm:mb-4">
+      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+        <i class="fas fa-clock text-sm sm:text-lg"></i>
+      </div>
+      <div class="text-right">
+        <div class="text-xl sm:text-2xl font-bold text-slate-800 group-hover:text-amber-600 transition-colors duration-300" id="pending-approvals">-</div>
+        <div class="text-xs sm:text-sm text-slate-500 font-medium">Pending Approvals</div>
+      </div>
+    </div>
+    <div class="w-full bg-slate-100 rounded-full h-1.5 sm:h-2">
+      <div class="bg-gradient-to-r from-amber-500 to-amber-600 h-1.5 sm:h-2 rounded-full" style="width: 45%"></div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-300 group animate-bounce-in" style="animation-delay: 0.3s;">
+    <div class="flex items-center justify-between mb-3 sm:mb-4">
+      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+        <i class="fas fa-check-circle text-sm sm:text-lg"></i>
+      </div>
+      <div class="text-right">
+        <div class="text-xl sm:text-2xl font-bold text-slate-800 group-hover:text-green-600 transition-colors duration-300" id="completed-pos">-</div>
+        <div class="text-xs sm:text-sm text-slate-500 font-medium">Completed</div>
+      </div>
+    </div>
+    <div class="w-full bg-slate-100 rounded-full h-1.5 sm:h-2">
+      <div class="bg-gradient-to-r from-green-500 to-green-600 h-1.5 sm:h-2 rounded-full" style="width: 90%"></div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-300 group animate-bounce-in" style="animation-delay: 0.4s;">
+    <div class="flex items-center justify-between mb-3 sm:mb-4">
+      <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+        <i class="fas fa-coins text-sm sm:text-lg"></i>
+      </div>
+      <div class="text-right">
+        <div class="text-xl sm:text-2xl font-bold text-slate-800 group-hover:text-purple-600 transition-colors duration-300">₹<span id="total-value">-</span></div>
+        <div class="text-xs sm:text-sm text-slate-500 font-medium">Total Value</div>
+      </div>
+    </div>
+    <div class="w-full bg-slate-100 rounded-full h-1.5 sm:h-2">
+      <div class="bg-gradient-to-r from-purple-500 to-purple-600 h-1.5 sm:h-2 rounded-full" style="width: 65%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- System Functions Section -->
+<div class="mb-6 sm:mb-8">
+  <div class="text-center mb-6 sm:mb-8 animate-slide-up">
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-2 sm:mb-3">System Functions</h2>
+    <p class="text-sm sm:text-base lg:text-lg text-slate-600 max-w-2xl mx-auto px-4">Access all procurement management tools and features with our comprehensive workflow system</p>
+  </div>
+  
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+    <!-- Purchase Requisition Card -->
+    <div class="dash-card group relative bg-white rounded-xl sm:rounded-2xl border border-slate-200 p-4 sm:p-6 hover:shadow-xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 animate-bounce-in" 
+         data-modal="modal-pr" style="animation-delay: 0.1s;">
+      <div class="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full opacity-20 transform translate-x-4 sm:translate-x-6 -translate-y-4 sm:-translate-y-6"></div>
+      
+      <div class="relative">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+            <img src="{{ url_for('static', filename='pr.png') }}" alt="PR Req" class="w-6 h-6 sm:w-8 sm:h-8 filter brightness-0 invert">
+          </div>
+          <div class="px-2 sm:px-3 py-1 bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 rounded-full text-xs font-bold flex items-center space-x-1">
+            <i class="fas fa-star text-xs"></i>
+            <span class="hidden sm:inline">Essential</span>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="space-y-3 sm:space-y-4">
+          <h3 class="text-lg sm:text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors duration-300">Purchase Requisition</h3>
+          <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">Initiate new purchase requests with automated approval workflows and budget validation.</p>
+          
+          <!-- Features -->
+          <div class="flex flex-wrap gap-1.5 sm:gap-2">
+            <span class="inline-flex items-center space-x-1 px-2 sm:px-3 py-1 bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-plus text-xs"></i>
+              <span class="hidden sm:inline">Create New PR</span>
+              <span class="sm:hidden">Create</span>
+            </span>
+            <span class="inline-flex items-center space-x-1 px-2 sm:px-3 py-1 bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-route text-xs"></i>
+              <span class="hidden sm:inline">Auto Routing</span>
+              <span class="sm:hidden">Routing</span>
+            </span>
+          </div>
+        </div>
+        
+        <!-- Hover Effect -->
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-blue-600/5 rounded-xl sm:rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+    </div>
+
+    <!-- Generate PO Card -->
+    <div class="dash-card group relative bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 animate-bounce-in" 
+         data-modal="modal-form" style="animation-delay: 0.2s;">
+      <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full opacity-20 transform translate-x-6 -translate-y-6"></div>
+      
+      <div class="relative">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+            <img src="{{ url_for('static', filename='po.png') }}" alt="Generate PO" class="w-8 h-8 filter brightness-0 invert">
+          </div>
+          <div class="px-3 py-1 bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 rounded-full text-xs font-bold flex items-center space-x-1">
+            <i class="fas fa-star"></i>
+            <span>Essential</span>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-slate-800 group-hover:text-green-600 transition-colors duration-300">Purchase Order</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">Create professional purchase order documents with automated numbering and template generation.</p>
+          
+          <!-- Features -->
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-green-50 text-slate-600 hover:text-green-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-file-alt"></i>
+              <span>Auto Generation</span>
+            </span>
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-green-50 text-slate-600 hover:text-green-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-download"></i>
+              <span>PDF Export</span>
+            </span>
+          </div>
+        </div>
+        
+        <!-- Hover Effect -->
+        <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 to-green-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+    </div>
+
+    <!-- Check Status Card -->
+    <div class="dash-card group relative bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 animate-bounce-in" 
+         data-modal="modal-status" style="animation-delay: 0.3s;">
+      <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full opacity-20 transform translate-x-6 -translate-y-6"></div>
+      
+      <div class="relative">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+            <img src="{{ url_for('static', filename='check.png') }}" alt="Check Status" class="w-8 h-8 filter brightness-0 invert">
+          </div>
+          <div class="px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 rounded-full text-xs font-bold flex items-center space-x-1">
+            <i class="fas fa-info-circle"></i>
+            <span>Status</span>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-slate-800 group-hover:text-purple-600 transition-colors duration-300">Check PR/PO Status</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">Track the status of purchase requests and orders with real-time updates and notifications.</p>
+          
+          <!-- Features -->
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-purple-50 text-slate-600 hover:text-purple-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-search"></i>
+              <span>Real-time Tracking</span>
+            </span>
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-purple-50 text-slate-600 hover:text-purple-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-bell"></i>
+              <span>Notifications</span>
+            </span>
+          </div>
+        </div>
+        
+        <!-- Hover Effect -->
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-purple-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+    </div>
+
+    <!-- Upload PO Card -->
+    <div class="dash-card group relative bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 animate-bounce-in" 
+         data-modal="modal-upload" style="animation-delay: 0.4s;">
+      <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full opacity-20 transform translate-x-6 -translate-y-6"></div>
+      
+      <div class="relative">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+            <img src="{{ url_for('static', filename='upload.png') }}" alt="Upload" class="w-8 h-8 filter brightness-0 invert">
+          </div>
+          <div class="px-3 py-1 bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 rounded-full text-xs font-bold flex items-center space-x-1">
+            <i class="fas fa-cog"></i>
+            <span>Management</span>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-slate-800 group-hover:text-orange-600 transition-colors duration-300">Upload PO</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">Upload purchase order documents and associate them with existing PO numbers for record keeping.</p>
+          
+          <!-- Features -->
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-orange-50 text-slate-600 hover:text-orange-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Document Upload</span>
+            </span>
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-orange-50 text-slate-600 hover:text-orange-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-link"></i>
+              <span>Auto Linking</span>
+            </span>
+          </div>
+        </div>
+        
+        <!-- Hover Effect -->
+        <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-orange-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+    </div>
+
+    <!-- Retrieve PO Card -->
+    <div class="dash-card group relative bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 animate-bounce-in" 
+         data-modal="modal-retrieve" style="animation-delay: 0.5s;">
+      <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-full opacity-20 transform translate-x-6 -translate-y-6"></div>
+      
+      <div class="relative">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+            <img src="{{ url_for('static', filename='retrieve.png') }}" alt="Retrieve" class="w-8 h-8 filter brightness-0 invert">
+          </div>
+          <div class="px-3 py-1 bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 rounded-full text-xs font-bold flex items-center space-x-1">
+            <i class="fas fa-cog"></i>
+            <span>Management</span>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors duration-300">Retrieve PO</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">Access and download previously uploaded purchase order documents from the system archive.</p>
+          
+          <!-- Features -->
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-download"></i>
+              <span>Download Files</span>
+            </span>
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-archive"></i>
+              <span>Archive Access</span>
+            </span>
+          </div>
+        </div>
+        
+        <!-- Hover Effect -->
+        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-indigo-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+    </div>
+
+    <!-- Replace PO Card -->
+    <div class="dash-card group relative bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 animate-bounce-in" 
+         data-modal="modal-replace" style="animation-delay: 0.6s;">
+      <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full opacity-20 transform translate-x-6 -translate-y-6"></div>
+      
+      <div class="relative">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+            <img src="{{ url_for('static', filename='replace.png') }}" alt="Replace" class="w-8 h-8 filter brightness-0 invert">
+          </div>
+          <div class="px-3 py-1 bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 rounded-full text-xs font-bold flex items-center space-x-1">
+            <i class="fas fa-cog"></i>
+            <span>Management</span>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-slate-800 group-hover:text-red-600 transition-colors duration-300">Replace/Amend PO</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">Update existing purchase orders with new documents or amendments while maintaining audit trails.</p>
+          
+          <!-- Features -->
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-edit"></i>
+              <span>Document Update</span>
+            </span>
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-history"></i>
+              <span>Audit Trail</span>
+            </span>
+          </div>
+        </div>
+        
+        <!-- Hover Effect -->
+        <div class="absolute inset-0 bg-gradient-to-br from-red-500/5 to-red-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+    </div>
+
+    <!-- Vendor Lookup Card -->
+    <div class="dash-card group relative bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2 animate-bounce-in" 
+         data-modal="modal-filters" style="animation-delay: 0.7s;">
+      <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-teal-100 to-teal-200 rounded-full opacity-20 transform translate-x-6 -translate-y-6"></div>
+      
+      <div class="relative">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-14 h-14 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+            <img src="{{ url_for('static', filename='retrieve.png') }}" alt="Filters" class="w-8 h-8 filter brightness-0 invert">
+          </div>
+          <div class="px-3 py-1 bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-800 rounded-full text-xs font-bold flex items-center space-x-1">
+            <i class="fas fa-tools"></i>
+            <span>Utility</span>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="space-y-4">
+          <h3 class="text-xl font-bold text-slate-800 group-hover:text-teal-600 transition-colors duration-300">Vendor Lookup</h3>
+                     <p class="text-slate-600 text-sm leading-relaxed">Search vendor items by vendor code or company name to find product information and specifications.</p>
+          
+          <!-- Features -->
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-teal-50 text-slate-600 hover:text-teal-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-filter"></i>
+              <span>Advanced Search</span>
+            </span>
+            <span class="inline-flex items-center space-x-1 px-3 py-1 bg-slate-50 hover:bg-teal-50 text-slate-600 hover:text-teal-600 rounded-lg text-xs font-medium transition-colors duration-200">
+              <i class="fas fa-database"></i>
+              <span>Vendor Database</span>
+            </span>
+          </div>
+        </div>
+        
+        <!-- Hover Effect -->
+        <div class="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-teal-600/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Analytics Dashboard Section -->
+<div class="mt-8 sm:mt-12">
+  <!-- Quick Jump to Dashboard -->
+  <div class="flex justify-center mb-6 sm:mb-8">
+    <a href="#dashboard_h" class="group inline-flex items-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 animate-float">
+      <i class="fas fa-chart-line text-sm sm:text-lg group-hover:animate-pulse"></i>
+      <span class="text-sm sm:text-base font-semibold">Jump to Analytics Dashboard</span>
+    </a>
+  </div>
+
+  <!-- Section Header -->
+  <div class="text-center mb-8 sm:mb-10 animate-slide-up">
+    <h2 id="dashboard_h" class="text-2xl sm:text-3xl font-bold text-slate-800 mb-3 sm:mb-4">Analytics Dashboard</h2>
+    <p class="text-sm sm:text-base lg:text-lg text-slate-600 max-w-3xl mx-auto px-4">Real-time insights into your procurement operations and performance metrics with interactive visualizations</p>
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+    <!-- PO Count Chart -->
+    <div class="group bg-white rounded-xl sm:rounded-2xl border border-slate-200 p-4 sm:p-6 hover:shadow-xl transition-all duration-500 animate-bounce-in" style="animation-delay: 0.1s;">
+      <div class="flex items-center justify-between mb-4 sm:mb-6">
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+            <i class="fas fa-chart-bar text-white text-sm sm:text-base"></i>
+          </div>
+          <div>
+            <h4 class="text-sm sm:text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors duration-300">Purchase Orders per Month</h4>
+            <p class="text-xs text-slate-500 hidden sm:block">Monthly PO creation trends</p>
+          </div>
+        </div>
+        <div class="w-6 h-6 sm:w-8 sm:h-8 bg-slate-50 hover:bg-blue-50 rounded-lg flex items-center justify-center cursor-help transition-colors duration-200" title="Monthly PO creation trends">
+          <i class="fas fa-info-circle text-slate-400 hover:text-blue-500 text-xs sm:text-sm"></i>
+        </div>
+      </div>
+      <div class="relative">
+        <div id="chartPoCount" class="w-full h-64 sm:h-80 rounded-lg overflow-hidden"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-blue-600/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+      </div>
+    </div>
+
+    <!-- Spending Trends Chart -->
+    <div class="group bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-500 animate-bounce-in" style="animation-delay: 0.2s;">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+            <i class="fas fa-chart-line text-white"></i>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold text-slate-800 group-hover:text-green-600 transition-colors duration-300">Monthly Spending Trends</h4>
+            <p class="text-xs text-slate-500">Total spending amount by month</p>
+          </div>
+        </div>
+        <div class="w-8 h-8 bg-slate-50 hover:bg-green-50 rounded-lg flex items-center justify-center cursor-help transition-colors duration-200" title="Total spending amount by month">
+          <i class="fas fa-info-circle text-slate-400 hover:text-green-500 text-sm"></i>
+        </div>
+      </div>
+      <div class="relative">
+        <div id="chartSpendTrend" class="w-full h-80 rounded-lg overflow-hidden"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 to-green-600/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+      </div>
+    </div>
+
+    <!-- Top Vendors Chart -->
+    <div class="group bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-500 animate-bounce-in" style="animation-delay: 0.3s;">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <i class="fas fa-chart-pie text-white"></i>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold text-slate-800 group-hover:text-purple-600 transition-colors duration-300">Top 5 Vendors by Spend</h4>
+            <p class="text-xs text-slate-500">Highest spending vendors</p>
+          </div>
+        </div>
+        <div class="w-8 h-8 bg-slate-50 hover:bg-purple-50 rounded-lg flex items-center justify-center cursor-help transition-colors duration-200" title="Highest spending vendors">
+          <i class="fas fa-info-circle text-slate-400 hover:text-purple-500 text-sm"></i>
+        </div>
+      </div>
+      <div class="relative">
+        <div id="chartTopVendors" class="w-full h-80 rounded-lg overflow-hidden"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-purple-600/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+      </div>
+    </div>
+
+    <!-- Average PO Value Chart -->
+    <div class="group bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl transition-all duration-500 animate-bounce-in" style="animation-delay: 0.4s;">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+            <i class="fas fa-chart-area text-white"></i>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold text-slate-800 group-hover:text-orange-600 transition-colors duration-300">Average PO Value by Month</h4>
+            <p class="text-xs text-slate-500">Average purchase order values</p>
+          </div>
+        </div>
+        <div class="w-8 h-8 bg-slate-50 hover:bg-orange-50 rounded-lg flex items-center justify-center cursor-help transition-colors duration-200" title="Average purchase order values">
+          <i class="fas fa-info-circle text-slate-400 hover:text-orange-500 text-sm"></i>
+        </div>
+      </div>
+      <div class="relative">
+        <div id="chartAvgPoValue" class="w-full h-80 rounded-lg overflow-hidden"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-orange-600/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal" id="modal-form">
+  <div class="modal-content po-modal">
+    <span class="close" data-modal="modal-form">&times;</span>
+    
+    <!-- PO Options Tabs -->
+    <div class="po-options-tabs" style="position: relative; display: flex; margin-bottom: 1.5rem; background: #f8fafc; border-radius: 12px; padding: 4px;">
+      <div class="po-options-slider" style="position: absolute; top: 4px; left: 4px; width: calc(33.333% - 2.67px); height: calc(100% - 8px); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; transition: all 0.3s ease; z-index: 1;"></div>
+      
+      <button id="tab-generate-po" class="po-options-tab active" style="flex: 1; padding: 12px 16px; background: none; border: none; border-radius: 8px; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 2;">
+        <i class="fas fa-plus-circle" style="margin-right: 8px;"></i>
+        Generate PO
+      </button>
+      <button id="tab-edit-po" class="po-options-tab" style="flex: 1; padding: 12px 16px; background: none; border: none; border-radius: 8px; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 2;">
+        <i class="fas fa-edit" style="margin-right: 8px;"></i>
+        Edit PO
+      </button>
+      <button id="tab-check-priority" class="po-options-tab" style="flex: 1; padding: 12px 16px; background: none; border: none; border-radius: 8px; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 2;">
+        <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+        Check Priority
+      </button>
+    </div>
+
+    <!-- Generate PO Section -->
+    <div id="generate-po-section" class="po-section">
+      <div class="flex items-center justify-between mb-4">
+        <h2>Generate Purchase Order</h2>
+        <div class="flex items-center space-x-3">
+          <div id="po-save-indicator" class="text-sm text-gray-500 hidden">
+            <i class="fas fa-save mr-1"></i>
+            <span>Auto-saved</span>
+          </div>
+          <button type="button" id="po-clear-data" class="text-xs text-gray-400 hover:text-gray-600" title="Clear saved data">
+            <i class="fas fa-trash-alt mr-1"></i>
+            Clear
+          </button>
+        </div>
+      </div>
+      
+      <!-- Error Display Area -->
+      <div id="po-error-display" class="hidden mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i class="fas fa-exclamation-circle text-red-400"></i>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">PO Generation Failed</h3>
+            <div class="mt-2 text-sm text-red-700">
+              <p id="po-error-message"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <form action="{{ url_for('generate_form') }}" method="post" enctype="multipart/form-data" class="form-container">
+        
+        <!-- Basic Information Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            Basic Information
+          </h3>
+          <div class="grid-3">
+            <div class="form-group">
+              <label for="project_name">Project Name</label>
+              <select id="project_name"
+                      name="project_name"
+                      required>
+                <option value="" disabled selected>
+                  Select Project Number
+                </option>
+                {% for proj in projects %}
+                  <option value="{{ proj }}">{{ proj }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="po-pr-number">Purchase Request Number</label>
+              <select id="po-pr-number"
+                      name="pr_number"
+                      disabled>
+                <option value="">Select Project Number first</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="po_number">PO Number</label>
+              <input type="text" id="po_number" name="po_number" readonly>
+            </div>
+          </div>
+          <div class="grid-2-compact">
+            <div class="form-group">
+              <label for="po_requester_role">Requester Role</label>
+              <select id="po_requester_role"
+                      name="po_requester_role"
+                      required>
+                <option value="" disabled selected>Select Role</option>
+                <option value="CEO">CEO</option>
+                <option value="CFO">CFO</option>
+                <option value="Head of Procurement">Head of Procurement</option>
+                <option value="Head of Project Planning and Control">
+                  Head of Project Planning &amp; Control
+                </option>
+                <option value="Head of Engineering">Head of Engineering</option>
+                <option value="Site Head Mechanical">Site Head Mechanical</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="po_requester_email">Requester Email</label>
+              <input id="po_requester_email"
+                     name="po_requester_email"
+                     type="email"
+                     placeholder="user@adventz.com"
+                     required>
+            </div>
+            <div class="form-group">
+              <label for="po_date">PO Date</label>
+              <input type="date" id="po_date" name="po_date">
+            </div>
+            <div class="form-group">
+              <label for="pr-expected-delivery">Expected Date of Delivery</label>
+              <input id="pr-expected-delivery" name="expected_delivery_date" type="date" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vendor Information Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i class="fas fa-building"></i>
+            Vendor Information
+          </h3>
+          <div class="grid-2-compact">
+            <div class="form-group">
+              <label for="vendor_code">Vendor Code</label>
+              <input id="vendor_code" name="vendor_code" required>
+            </div>
+            <div class="form-group">
+              <label for="company">Vendor Name</label>
+              <input id="company" name="company" required>
+            </div>
+          </div>
+          <div class="form-group full-width">
+            <label for="company_address">Vendor Address</label>
+            <textarea id="company_address" name="company_address" rows="2"></textarea>
+          </div>
+          <div class="grid-3">
+            <div class="form-group">
+              <label for="gst">GST Number</label>
+              <input id="gst" name="gst">
+            </div>
+            <div class="form-group">
+              <label for="contact_person_name">Contact Person</label>
+              <input id="contact_person_name" name="contact_person_name">
+            </div>
+            <div class="form-group">
+              <label for="contact_person_mobile">Contact Mobile</label>
+              <input id="contact_person_mobile" name="contact_person_mobile">
+            </div>
+          </div>
+          <div class="grid-2-compact">
+            <div class="form-group">
+              <label for="contact_person_email">Contact Email</label>
+              <input id="contact_person_email" name="contact_person_email" type="email">
+            </div>
+            <div class="form-group">
+              <label for="your_reference">Your Reference</label>
+              <input id="your_reference" name="your_reference">
+            </div>
+          </div>
+          <div class="grid-2-compact">
+            <div class="form-group">
+              <label for="price_basis">Price Basis (INCOTERMS)</label>
+              <input id="price_basis" name="price_basis">
+            </div>
+            <div class="form-group">
+              <label for="payment_term">Payment Terms</label>
+              <input id="payment_term" name="payment_term">
+            </div>
+          </div>
+        </div>
+
+        <!-- Shipping Information Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i class="fas fa-shipping-fast"></i>
+            Shipping Information
+          </h3>
+          <div class="grid-2-compact">
+            <div class="form-group">
+              <label for="ship_to_location">Ship To (Location)</label>
+              <input id="ship_to_location" name="ship_to_location">
+            </div>
+            <div class="form-group">
+              <label for="ship_to_gstin">Ship To GSTIN</label>
+              <input id="ship_to_gstin" name="ship_to_gstin">
+            </div>
+          </div>
+          <div class="form-group full-width">
+            <label for="ship_to_address">Ship To Address</label>
+            <textarea id="ship_to_address" name="ship_to_address" rows="2"></textarea>
+          </div>
+          <div class="grid-2-compact">
+            <div class="form-group">
+              <label for="bill_to_company">Bill To Company</label>
+              <input id="bill_to_company" name="bill_to_company">
+            </div>
+            <div class="form-group">
+              <label for="bill_to_gstin">Bill To GSTIN</label>
+              <input id="bill_to_gstin" name="bill_to_gstin">
+            </div>
+          </div>
+          <div class="form-group full-width">
+            <label for="bill_to_address">Bill To Address</label>
+            <textarea id="bill_to_address" name="bill_to_address" rows="2"></textarea>
+          </div>
+        </div>
+
+        <!-- Special Conditions of Contract Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i class="fas fa-file-contract"></i>
+            Special Conditions of Contract
+          </h3>
+          
+          <!-- Vendor Final Offer Date -->
+          <div class="form-group">
+            <label for="vendor_final_offer_date">Vendor Final Offer Date</label>
+            <input id="vendor_final_offer_date" name="vendor_final_offer_date" type="date">
+          </div>
+
+          <!-- Payment Milestones -->
+          <div class="form-group full-width">
+            <label>Payment Milestones</label>
+            <div id="payment_milestones_container">
+              <div class="payment-milestone-item">
+                <input type="text" name="payment_milestone_1" placeholder="Payment Milestone 1" class="milestone-input">
+                <button type="button" class="remove-milestone-btn" onclick="removePaymentMilestone(this)" style="display: none;">Remove</button>
+              </div>
+            </div>
+            <button type="button" id="add_payment_milestone" class="btn-secondary" style="margin-top: 10px;">
+              <i class="fas fa-plus"></i> Add Payment Milestone
+            </button>
+          </div>
+
+          <!-- List of Documents for Payment Processing -->
+          <div class="form-group full-width">
+            <label for="payment_documents">List of Documents for Payment Processing</label>
+            <textarea id="payment_documents" name="payment_documents" rows="4" placeholder="Enter the list of documents required for payment processing..."></textarea>
+          </div>
+
+          <!-- Delivery Schedule -->
+          <div class="form-group full-width">
+            <label>Delivery Schedule</label>
+            <div id="delivery_schedule_container">
+              <div class="delivery-schedule-item">
+                <input type="text" name="delivery_schedule_1" placeholder="Delivery Schedule 1" class="schedule-input">
+                <button type="button" class="remove-schedule-btn" onclick="removeDeliverySchedule(this)" style="display: none;">Remove</button>
+              </div>
+            </div>
+            <button type="button" id="add_delivery_schedule" class="btn-secondary" style="margin-top: 10px;">
+              <i class="fas fa-plus"></i> Add Delivery Schedule
+            </button>
+          </div>
+        </div>
+
+        <!-- Items Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i class="fas fa-boxes"></i>
+            Items Information
+          </h3>
+          <div class="form-group">
+            <label for="num_items">Number of Items</label>
+            <input id="num_items"
+                   name="number_of_items"
+                   type="number"
+                   min="1"
+                   value="1"
+                   readonly
+                   style="background-color: #f8f9fa; color: #6c757d; cursor: not-allowed;">
+          </div>
+        </div>
+
+        <div id="items_container" class="items-grid"></div>  
+        
+        <!-- Budget Section -->
+        <fieldset class="budget-fieldset form-group full-width">
+          <legend>
+            <i class="fas fa-calculator"></i>
+            Allocation of Budget
+          </legend>
+          <div class="grid-4">
+            <div class="form-group">
+              <label for="po-indicative-price">Indicative Price (₹)</label>
+              <input id="po-indicative-price" name="indicative_price" type="text" readonly>
+            </div>
+            <div class="form-group">
+              <label for="po-department" style="color: #6c757d;">Department (from PR)</label>
+              <input id="po-department" name="po_department" type="text" readonly>
+            </div>
+            <div class="form-group">
+              <label for="po-total-budget">Total Department Budget (₹)</label>
+              <input id="po-total-budget" name="budget_total" type="text" readonly>
+            </div>
+            <div class="form-group">
+              <label for="po-remaining-budget">Remaining Budget (₹)</label>
+              <input id="po-remaining-budget" name="remaining_budget" type="text" readonly>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Charges Section -->
+        <fieldset class="charges-fieldset form-group full-width">
+          <legend>
+            <i class="fas fa-percentage"></i>
+            Charges
+          </legend>
+          <div class="grid-4">
+            <div class="form-group">
+              <label for="pf_rate">P&F Rate (%)</label>
+              <input id="pf_rate" name="pf_rate" type="text" value="0">
+            </div>
+            <div class="form-group">
+              <label for="gst_rate">GST Rate (%)</label>
+              <input id="gst_rate" name="gst_rate" type="text" value="0">
+            </div>
+            <div class="form-group">
+              <label for="freight_rate">Freight Rate (%)</label>
+              <input id="freight_rate" name="freight_rate" type="text" value="0">
+            </div>
+            <div class="form-group">
+              <label for="other_rate">Other Charges Rate (%)</label>
+              <input id="other_rate" name="other_rate" type="text" value="0">
+            </div>
+          </div>
+        </fieldset>
+        
+        <!-- NFA Upload Section - Only shown when budget exceeds or Type of Item is Non-Budgeted -->
+        <fieldset id="nfa-fieldset" class="form-group full-width" style="display: none;">
+          <legend>
+            <i class="fas fa-file-upload"></i>
+            NFA (No Further Action) Document
+          </legend>
+          <div class="form-group">
+            <label for="nfa-file">Upload NFA Document <span style="color: red;">*</span></label>
+            <input id="nfa-file" name="nfa_file" type="file" accept=".pdf,.doc,.docx">
+            <small style="color: #666; font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+              NFA is required when budget exceeds limit or Type of Item is Non-Budgeted
+            </small>
+          </div>
+        </fieldset>
+        
+        <!-- Additional Documents Section -->
+        <fieldset class="form-group full-width">
+          <legend>
+            <i class="fas fa-paperclip"></i>
+            Additional Documents (Optional)
+          </legend>
+          <div class="form-group">
+            <button type="button" id="additional-docs-btn" class="btn-secondary" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease;">
+              <i class="fas fa-paperclip" style="margin-right: 8px;"></i>
+              Upload Additional Documents
+            </button>
+            <small style="color: #666; font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+              Upload Technical Specifications, Price Comparative Sheets, and NFA documents
+            </small>
+          </div>
+        </fieldset>
+        
+        <!-- Hidden fields for additional documents -->
+        <input type="hidden" id="additional-docs-data" name="additional_docs_data" value="">
+        
+        <!-- Submit Button -->
+        <div class="form-group full-width" style="text-align: center; margin-top: var(--spacing-xl); padding-top: var(--spacing-lg); border-top: 2px solid var(--border-color);">
+          <button type="submit" class="btn-primary" style="padding: var(--spacing-md) var(--spacing-2xl); font-size: 1rem; min-width: 200px;">
+            <i class="fas fa-plus-circle"></i>
+            Generate Purchase Order
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Edit PO Section -->
+    <div id="edit-po-section" class="po-section" style="display: none;">
+      <h2>Edit Purchase Order</h2>
+      <div class="form-container">
+        <div class="form-group">
+          <label for="edit-po-number">Select Rejected PO to Edit</label>
+          <select id="edit-po-number" name="edit_po_number" required>
+            <option value="" disabled selected>Select a rejected PO to edit</option>
+          </select>
+          <small style="color: #666; font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+            Only rejected POs are available for editing
+          </small>
+        </div>
+        <div id="edit-po-form-container" style="display: none;">
+          <!-- Edit PO form will be dynamically populated here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Check Priority Section -->
+    <div id="check-priority-section" class="po-section" style="display: none;">
+      <h2>Check Priority</h2>
+      <div class="form-container">
+        <div class="form-group">
+          <label for="priority-filter">Filter by Priority</label>
+          <select id="priority-filter" name="priority_filter">
+            <option value="critical">Critical</option>
+            <option value="non-critical">Non-Critical</option>
+          </select>
+        </div>
+        <button type="button" id="load-priority-data" class="btn-primary mt-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 500; transition: all 0.3s ease;">Load Priority Data</button>
+        
+        <div id="priority-results" style="margin-top: 1.5rem;">
+          <!-- Priority results will be displayed here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-filters">
+  <div class="modal-content">
+    <span class="close" data-modal="modal-filters">&times;</span>
+    <h2>Vendor Item Search</h2>
+    <form id="filtersForm" class="form-container single-col">
+             <div class="form-group">
+         <label for="filter_search_type">Search By</label>
+         <select id="filter_search_type" name="search_type" required>
+           <option value="code" selected>Vendor Code</option>
+           <option value="name">Company Name</option>
+         </select>
+       </div>
+      <div class="form-group">
+        <label for="filter_search_term">Search Term</label>
+        <input id="filter_search_term" name="search_term" placeholder="Enter vendor code or company name" required>
+      </div>
+      <button type="submit" class="btn-primary mt-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 500; transition: all 0.3s ease;">Search</button>
+    </form>
+    <div id="filters_results" style="margin-top:16px;"></div>
+  </div>
+</div>
+
+<!-- Additional Documents Modal -->
+<div class="modal" id="modal-additional-docs">
+  <div class="modal-content">
+    <span class="close" data-modal="modal-additional-docs">&times;</span>
+    <h2>Upload Additional Documents</h2>
+    <form id="additionalDocsForm" class="form-container">
+      <div class="form-group">
+        <label for="tech-spec-file">Technical Specification - Approved MR Copy</label>
+        <input id="tech-spec-file" name="tech_spec_file" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx">
+        <small style="color: #666; font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+          Upload approved material requisition copy
+        </small>
+      </div>
+      
+      <div class="form-group">
+        <label for="price-comp-file">Approved Price Comparative Sheet</label>
+        <input id="price-comp-file" name="price_comp_file" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx">
+        <small style="color: #666; font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+          Upload approved price comparison document
+        </small>
+      </div>
+      
+      <div class="form-group">
+        <label for="nfa-doc-file">Approved NFA</label>
+        <input id="nfa-doc-file" name="nfa_doc_file" type="file" accept=".pdf,.doc,.docx">
+        <small style="color: #666; font-size: 0.875rem; margin-top: 0.25rem; display: block;">
+          Upload approved No Further Action document
+        </small>
+      </div>
+      
+      <div class="flex gap-4 mt-6">
+        <button type="button" id="save-additional-docs" class="btn-primary flex-1" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 500; transition: all 0.3s ease;">Save Documents</button>
+        <button type="button" class="btn-secondary flex-1" data-modal="modal-additional-docs" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-weight: 500; transition: all 0.3s ease;">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% include 'po_system_others.html' %}
+{% endblock %}

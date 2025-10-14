@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Management - Adventz ERP System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <style>
+        .file-row:hover { background-color: #f9fafb; }
+    </style>
+    <script>
+        function confirmReplace(safeId, relPath) {
+            const input = document.getElementById('upload_' + safeId);
+            if (!input.files || !input.files[0]) {
+                alert('Please choose a file to upload.');
+                return;
+            }
+            if (!confirm('This will replace the existing file. A timestamped backup will be created. Continue?')) {
+                return;
+            }
+            const formData = new FormData();
+            formData.append('rel', relPath);
+            formData.append('file', input.files[0]);
+            fetch('/admin/data/upload', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success) {
+                        alert('File replaced successfully');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (d.message || 'Upload failed'));
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Upload failed');
+                });
+        }
+    </script>
+    <script>
+        function downloadFile(relPath) {
+            const a = document.createElement('a');
+            a.href = '/admin/data/download?rel=' + encodeURIComponent(relPath);
+            a.rel = 'noopener';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-database text-2xl text-blue-600"></i>
+                    <h1 class="text-xl font-bold text-gray-900">Adventz ERP Data Management</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/user_configuration" class="text-blue-600 hover:text-blue-500">
+                        <i class="fas fa-users-cog mr-1"></i>Admin Panel
+                    </a>
+                    <a href="/dashboard" class="text-blue-600 hover:text-blue-500">
+                        <i class="fas fa-home mr-1"></i>Dashboard
+                    </a>
+                    <a href="/logout" class="text-red-600 hover:text-red-500">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                <i class="fas fa-file-excel mr-3 text-green-600"></i>Excel Data Files
+            </h1>
+            <p class="text-gray-600">Download any Excel, edit offline, then upload to replace. A backup copy is created automatically.</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <div class="text-xl font-semibold text-gray-900">Files</div>
+                <div class="text-sm text-gray-500">Locations: project root, `data/`, and other known Excel files</div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Path</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modified</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for f in files %}
+                        <tr class="file-row">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div class="flex items-center">
+                                    <i class="fas fa-file-excel text-green-600 mr-2"></i>
+                                    {{ f.name }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ f.relpath }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ f.size_human }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ f.mtime_human }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button onclick="downloadFile('{{ f.relpath|e }}')" class="text-blue-600 hover:text-blue-900 mr-4">
+                                    <i class="fas fa-download mr-1"></i>Download
+                                </button>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input id="upload_{{ f.safe_id }}" type="file" accept=".xlsx,.xls" class="hidden" onchange="confirmReplace('{{ f.safe_id }}','{{ f.relpath|e }}')">
+                                    <span class="px-3 py-1 text-white bg-green-600 rounded hover:bg-green-700">
+                                        <i class="fas fa-upload mr-1"></i>Upload & Replace
+                                    </span>
+                                </label>
+            
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

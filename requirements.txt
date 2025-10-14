@@ -1,0 +1,14 @@
+Flask
+Werkzeug
+pandas
+numpy
+python-dotenv
+openpyxl
+docxtpl
+python-docx
+num2words
+itsdangerous
+Jinja2
+requests
+gunicorn
+email-validator

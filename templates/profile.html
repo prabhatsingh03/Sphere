@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Adventz ERP System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Header -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-building text-2xl"></i>
+                    <h1 class="text-xl font-bold">Adventz ERP System</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/po_system" class="hover:text-gray-200 transition-colors">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="/logout" class="hover:text-gray-200 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">User Profile</h1>
+            <p class="text-gray-600">Manage your account information and preferences</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6 space-y-3">
+                    {% for category, message in messages %}
+                        <div class="p-4 rounded-lg {% if category == 'error' %}bg-red-100 text-red-700 border border-red-200{% elif category == 'success' %}bg-green-100 text-green-700 border border-green-200{% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %}">
+                            <div class="flex items-center">
+                                {% if category == 'error' %}
+                                    <i class="fas fa-exclamation-circle mr-2"></i>
+                                {% elif category == 'success' %}
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                {% else %}
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                {% endif %}
+                                {{ message }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Profile Information -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-lg p-6 card-shadow">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-semibold text-gray-900">Profile Information</h2>
+                        <button id="edit-profile-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-edit mr-2"></i>Edit Profile
+                        </button>
+                    </div>
+
+                    <form id="profile-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Username
+                                </label>
+                                <input type="text" id="username" name="username" value="{{ user.username }}" readonly
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                                <p class="text-xs text-gray-500 mt-1">Username cannot be changed</p>
+                            </div>
+
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Email Address
+                                </label>
+                                <input type="email" id="email" name="email" value="{{ user.email }}" readonly
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                                <p class="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                            </div>
+
+                            <div>
+                                <label for="full_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Full Name <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="full_name" name="full_name" value="{{ user.full_name }}" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    disabled>
+                            </div>
+
+                            <div>
+                                <label for="department" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Department
+                                </label>
+                                <select id="department" name="department"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    disabled>
+                                    <option value="">Select Department</option>
+                                    <option value="Procurement" {% if user.department == 'Procurement' %}selected{% endif %}>Procurement</option>
+                                    <option value="Engineering" {% if user.department == 'Engineering' %}selected{% endif %}>Engineering</option>
+                                    <option value="Operations" {% if user.department == 'Operations' %}selected{% endif %}>Operations</option>
+                                    <option value="Finance" {% if user.department == 'Finance' %}selected{% endif %}>Finance</option>
+                                    <option value="IT" {% if user.department == 'IT' %}selected{% endif %}>IT</option>
+                                    <option value="HR" {% if user.department == 'HR' %}selected{% endif %}>HR</option>
+                                    <option value="Marketing" {% if user.department == 'Marketing' %}selected{% endif %}>Marketing</option>
+                                    <option value="Sales" {% if user.department == 'Sales' %}selected{% endif %}>Sales</option>
+                                    <option value="Other" {% if user.department == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Role
+                                </label>
+                                <input type="text" id="role" name="role" value="{{ user.role }}" readonly
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                                <p class="text-xs text-gray-500 mt-1">Role cannot be changed</p>
+                            </div>
+
+                            <div>
+                                <label for="created_at" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Member Since
+                                </label>
+                                <input type="text" id="created_at" name="created_at" 
+                                    value="{{ user.created_at.split(' ')[0] if user.created_at else 'N/A' }}" readonly
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-4 pt-4" id="profile-actions" style="display: none;">
+                            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>Save Changes
+                            </button>
+                            <button type="button" id="cancel-edit-btn" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                                <i class="fas fa-times mr-2"></i>Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Account Information Section -->
+                <div class="bg-white rounded-lg shadow-lg p-6 card-shadow mt-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-6">Account Information</h2>
+                    
+                    <div class="space-y-6">
+                        <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-info-circle text-blue-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-blue-800">Password Changes</h4>
+                                    <div class="mt-2 text-sm text-blue-700">
+                                        <p>For security reasons, password changes must be requested through your system administrator.</p>
+                                        <p class="mt-1">Please contact your admin if you need to change your password.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-yellow-800">Account Security</h4>
+                                    <div class="mt-2 text-sm text-yellow-700">
+                                        <p>Your account credentials are managed by the system administrator to ensure security compliance.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1">
+                <!-- Account Summary -->
+                <div class="bg-white rounded-lg shadow-lg p-6 card-shadow mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Summary</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Status:</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check-circle mr-1"></i>Active
+                            </span>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Last Login:</span>
+                            <span class="text-sm text-gray-900">
+                                {{ user.last_login.split(' ')[0] if user.last_login else 'Never' }}
+                            </span>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Permissions:</span>
+                            <span class="text-sm text-gray-900">{{ user.role }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow-lg p-6 card-shadow">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                    
+                    <div class="space-y-3">
+                        <a href="/po_system" class="block w-full text-left px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-home mr-2"></i>Go to Dashboard
+                        </a>
+                        
+                        <button onclick="window.print()" class="block w-full text-left px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-print mr-2"></i>Print Profile
+                        </button>
+                        
+                        <a href="/logout" class="block w-full text-left px-4 py-3 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Sign Out
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Profile editing functionality
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const profileActions = document.getElementById('profile-actions');
+        const profileForm = document.getElementById('profile-form');
+        const editableFields = ['full_name', 'department'];
+
+        // Store original values
+        const originalValues = {};
+        editableFields.forEach(field => {
+            originalValues[field] = document.getElementById(field).value;
+        });
+
+        editProfileBtn.addEventListener('click', function() {
+            // Enable editing
+            editableFields.forEach(field => {
+                const element = document.getElementById(field);
+                element.disabled = false;
+                element.classList.remove('bg-gray-50', 'text-gray-500');
+            });
+            
+            profileActions.style.display = 'flex';
+            editProfileBtn.style.display = 'none';
+        });
+
+        cancelEditBtn.addEventListener('click', function() {
+            // Restore original values and disable editing
+            editableFields.forEach(field => {
+                const element = document.getElementById(field);
+                element.value = originalValues[field];
+                element.disabled = true;
+                element.classList.add('bg-gray-50', 'text-gray-500');
+            });
+            
+            profileActions.style.display = 'none';
+            editProfileBtn.style.display = 'block';
+        });
+
+        // Profile form submission
+        profileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                full_name: formData.get('full_name'),
+                department: formData.get('department')
+            };
+            
+            // Update profile via API
+            fetch('/api/update_profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update original values
+                    editableFields.forEach(field => {
+                        originalValues[field] = document.getElementById(field).value;
+                    });
+                    
+                    // Disable editing
+                    editableFields.forEach(field => {
+                        const element = document.getElementById(field);
+                        element.disabled = true;
+                        element.classList.add('bg-gray-50', 'text-gray-500');
+                    });
+                    
+                    profileActions.style.display = 'none';
+                    editProfileBtn.style.display = 'block';
+                    
+                    // Show success message
+                    showMessage('Profile updated successfully!', 'success');
+                } else {
+                    showMessage('Error updating profile: ' + (data.message || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error updating profile. Please try again.', 'error');
+            });
+        });
+
+        // Password form submission
+        document.getElementById('password-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const newPassword = formData.get('new_password');
+            const confirmPassword = formData.get('confirm_new_password');
+            
+            if (newPassword !== confirmPassword) {
+                showMessage('New passwords do not match!', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showMessage('New password must be at least 8 characters long!', 'error');
+                return;
+            }
+            
+            const data = {
+                current_password: formData.get('current_password'),
+                new_password: newPassword
+            };
+            
+            // Change password via API
+            fetch('/api/change_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Password changed successfully!', 'success');
+                    this.reset();
+                } else {
+                    showMessage('Error changing password: ' + (data.message || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error changing password. Please try again.', 'error');
+            });
+        });
+
+        function showMessage(message, type) {
+            // Create message element
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-100 text-green-700 border border-green-200' :
+                type === 'error' ? 'bg-red-100 text-red-700 border border-red-200' :
+                'bg-blue-100 text-blue-700 border border-blue-200'
+            }`;
+            
+            messageDiv.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            // Remove message after 5 seconds
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
