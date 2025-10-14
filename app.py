@@ -143,6 +143,21 @@ def add_security_headers(response):
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     return response
 
+# ─── URL Helpers ───────────────────────────────────────────────────────────────
+BASE_URL = os.environ.get('BASE_URL', '').strip().rstrip('/')
+
+def absolute_url(endpoint, **values):
+    """Build absolute URL using BASE_URL if provided, else Flask external URL.
+    This avoids malformed hosts like "http://\\domain" in some email clients.
+    """
+    if BASE_URL:
+        try:
+            path = url_for(endpoint, _external=False, **values)
+            return f"{BASE_URL}{path}"
+        except Exception:
+            pass
+    return url_for(endpoint, _external=True, **values)
+
 # ─── Configuration ────────────────────────────────────────────────────────────
 # Load sensitive data from environment variables with fallbacks
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
@@ -2791,8 +2806,8 @@ def generate_form():
         # Don't fail the PO generation if vendor saving fails
 
     # Create approval URLs for first approver
-    approve_url_1 = url_for('approval_page', type='po', action='approve', id=new_po_number, role=first_approver, _external=True)
-    reject_url_1 = url_for('approval_page', type='po', action='reject', id=new_po_number, role=first_approver, _external=True)
+    approve_url_1 = absolute_url('approval_page', type='po', action='approve', id=new_po_number, role=first_approver)
+    reject_url_1 = absolute_url('approval_page', type='po', action='reject', id=new_po_number, role=first_approver)
     
     details_table = create_po_details_table(
         po_number=new_po_number, project_name=pr_row['Project Number'], pr_number=pr_number,
@@ -3016,8 +3031,8 @@ def process_po_approval(po, role, chain, df_po):
                 set_po_status("First Approval Complete - Pending Second Approval")
                 
                 # Create approval URLs for second approver first
-                approve_url_2 = url_for('approve_po', po=po, action='approve', role=second_info['role'], _external=True)
-                reject_url_2 = url_for('approve_po', po=po, action='reject', role=second_info['role'], _external=True)
+                approve_url_2 = absolute_url('approve_po', po=po, action='approve', role=second_info['role'])
+                reject_url_2 = absolute_url('approve_po', po=po, action='reject', role=second_info['role'])
                 
                 action_buttons = [
                     {"text": "✅ Approve", "url": approve_url_2, "color": "primary"}, 
@@ -3693,8 +3708,8 @@ def approve_po():
                 set_po_status("First Approval Complete - Pending Second Approval")
                 
                 # Create approval URLs for second approver
-                approve_url_2 = url_for('approval_page', type='po', action='approve', id=po, role=second_info['role'], _external=True)
-                reject_url_2 = url_for('approval_page', type='po', action='reject', id=po, role=second_info['role'], _external=True)
+                approve_url_2 = absolute_url('approval_page', type='po', action='approve', id=po, role=second_info['role'])
+                reject_url_2 = absolute_url('approval_page', type='po', action='reject', id=po, role=second_info['role'])
                 
                 # Get PO details for the email
                 po_row = df_po[df_po['PO Number'] == po].iloc[0]
@@ -4262,8 +4277,8 @@ def pr_requisition():
     dfp.to_excel(DATA_FILE, index=False)
     
     # Create external approval URLs (scheme will be derived by the client/proxy)
-    approve_url = url_for('approval_page', type='pr', action='approve', id=pr_number, role=next_approver_role, _external=True)
-    reject_url = url_for('approval_page', type='pr', action='reject', id=pr_number, role=next_approver_role, _external=True)
+    approve_url = absolute_url('approval_page', type='pr', action='approve', id=pr_number, role=next_approver_role)
+    reject_url = absolute_url('approval_page', type='pr', action='reject', id=pr_number, role=next_approver_role)
 
     content = f"""
       <p>A new Purchase Requisition has been submitted and requires your approval.</p>
@@ -5931,7 +5946,7 @@ def update_po():
                     
                     if first_approver and first_approver_email:
                         # Create approval URLs for first approver
-                        approve_url_1 = url_for('approval_page', type='po', action='approve', id=po_number, role=first_approver, _external=True)
+                        approve_url_1 = absolute_url('approval_page', type='po', action='approve', id=po_number, role=first_approver)
                         
                         # Create email content for updated PO
                         po_items = get_po_items_for_email(po_number)
