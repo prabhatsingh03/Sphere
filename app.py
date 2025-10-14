@@ -144,18 +144,43 @@ def add_security_headers(response):
     return response
 
 # ─── URL Helpers ───────────────────────────────────────────────────────────────
-BASE_URL = os.environ.get('BASE_URL', '').strip().rstrip('/')
+def _normalize_base_url(raw_value: str) -> str:
+    """Normalize BASE_URL from env: remove backslashes, ensure scheme, and strip trailing slash."""
+    if not raw_value:
+        return ''
+    value = raw_value.strip()
+    # Replace any backslashes with forward slashes
+    value = value.replace('\\', '/')
+    # Remove accidental leading slashes
+    while value.startswith('/') and not value.startswith('//'):
+        value = value[1:]
+    # Ensure scheme exists; default to https
+    if not value.lower().startswith(('http://', 'https://')):
+        value = 'https://' + value
+    # Collapse multiple slashes after scheme
+    try:
+        from urllib.parse import urlsplit, urlunsplit
+        parts = urlsplit(value)
+        # Recompose with normalized path only
+        value = urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip('/'), parts.query, parts.fragment))
+    except Exception:
+        pass
+    return value.rstrip('/')
+
+BASE_URL = _normalize_base_url(os.environ.get('BASE_URL', ''))
 
 def absolute_url(endpoint, **values):
-    """Build absolute URL using BASE_URL if provided, else Flask external URL.
-    This avoids malformed hosts like "http://\\domain" in some email clients.
-    """
+    """Build absolute URL using normalized BASE_URL if provided; otherwise use Flask external URL."""
+    try:
+        path = url_for(endpoint, _external=False, **values)
+    except Exception:
+        return url_for(endpoint, _external=True, **values)
     if BASE_URL:
         try:
-            path = url_for(endpoint, _external=False, **values)
-            return f"{BASE_URL}{path}"
+            from urllib.parse import urljoin
+            return urljoin(BASE_URL + '/', path.lstrip('/'))
         except Exception:
-            pass
+            return f"{BASE_URL}{path}"
     return url_for(endpoint, _external=True, **values)
 
 # ─── Configuration ────────────────────────────────────────────────────────────
