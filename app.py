@@ -24,6 +24,7 @@ from flask import flash
 from io import BytesIO
 from flask import send_file
 import logging
+from werkzeug.middleware.proxy_fix import ProxyFix
 logging.basicConfig(level=logging.INFO)
 
 # Import database manager
@@ -111,8 +112,10 @@ init_excel(DATA_FILE,   [
 # ─── Flask setup ──────────────────────────────────────────────────────────────
 app = Flask(__name__)
 
-# Use HTTP scheme by default; production SSL should be handled by the reverse proxy (e.g., Lightsail/Load Balancer)
-app.config['PREFERRED_URL_SCHEME'] = 'http'
+# Trust reverse proxy headers for scheme/host and set canonical host/scheme
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
+app.config['SERVER_NAME'] = os.getenv('SERVER_NAME', 'sphere.simonindia.ai')
+app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
 
 # Generate a strong secret key if not provided via environment
 DEFAULT_SECRET_KEY = ''.join(secrets.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(64))
@@ -2782,8 +2785,8 @@ def generate_form():
         # Don't fail the PO generation if vendor saving fails
 
     # Create approval URLs for first approver
-    approve_url_1 = url_for('approval_page', type='po', action='approve', id=new_po_number, role=first_approver, _external=True)
-    reject_url_1 = url_for('approval_page', type='po', action='reject', id=new_po_number, role=first_approver, _external=True)
+    approve_url_1 = url_for('approval_page', type='po', action='approve', id=new_po_number, role=first_approver, _external=True, _scheme=app.config.get('PREFERRED_URL_SCHEME', 'https'))
+    reject_url_1 = url_for('approval_page', type='po', action='reject', id=new_po_number, role=first_approver, _external=True, _scheme=app.config.get('PREFERRED_URL_SCHEME', 'https'))
     
     details_table = create_po_details_table(
         po_number=new_po_number, project_name=pr_row['Project Number'], pr_number=pr_number,
@@ -3684,8 +3687,8 @@ def approve_po():
                 set_po_status("First Approval Complete - Pending Second Approval")
                 
                 # Create approval URLs for second approver
-                approve_url_2 = url_for('approval_page', type='po', action='approve', id=po, role=second_info['role'], _external=True)
-                reject_url_2 = url_for('approval_page', type='po', action='reject', id=po, role=second_info['role'], _external=True)
+                approve_url_2 = url_for('approval_page', type='po', action='approve', id=po, role=second_info['role'], _external=True, _scheme=app.config.get('PREFERRED_URL_SCHEME', 'https'))
+                reject_url_2 = url_for('approval_page', type='po', action='reject', id=po, role=second_info['role'], _external=True, _scheme=app.config.get('PREFERRED_URL_SCHEME', 'https'))
                 
                 # Get PO details for the email
                 po_row = df_po[df_po['PO Number'] == po].iloc[0]
@@ -4253,8 +4256,8 @@ def pr_requisition():
     dfp.to_excel(DATA_FILE, index=False)
     
     # Create external approval URLs (scheme will be derived by the client/proxy)
-    approve_url = url_for('approval_page', type='pr', action='approve', id=pr_number, role=next_approver_role, _external=True)
-    reject_url = url_for('approval_page', type='pr', action='reject', id=pr_number, role=next_approver_role, _external=True)
+    approve_url = url_for('approval_page', type='pr', action='approve', id=pr_number, role=next_approver_role, _external=True, _scheme=app.config.get('PREFERRED_URL_SCHEME', 'https'))
+    reject_url = url_for('approval_page', type='pr', action='reject', id=pr_number, role=next_approver_role, _external=True, _scheme=app.config.get('PREFERRED_URL_SCHEME', 'https'))
 
     content = f"""
       <p>A new Purchase Requisition has been submitted and requires your approval.</p>
