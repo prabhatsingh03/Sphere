@@ -12,6 +12,7 @@ from flask import (
     send_file, session, flash
 )
 from werkzeug.utils import secure_filename
+from werkzeug.middleware.proxy_fix import ProxyFix
 from functools import wraps
 import pandas as pd
 import numpy as np
@@ -113,6 +114,14 @@ app = Flask(__name__)
 
 # Use HTTP scheme by default; production SSL should be handled by the reverse proxy (e.g., Lightsail/Load Balancer)
 app.config['PREFERRED_URL_SCHEME'] = 'http'
+
+# Honor X-Forwarded-* headers from reverse proxies (Lightsail LB / nginx)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
+
+# Allow overriding scheme via environment in production (set PREFERRED_URL_SCHEME=https)
+_env_scheme = os.getenv('PREFERRED_URL_SCHEME')
+if _env_scheme in ('http', 'https'):
+    app.config['PREFERRED_URL_SCHEME'] = _env_scheme
 
 # Generate a strong secret key if not provided via environment
 DEFAULT_SECRET_KEY = ''.join(secrets.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(64))
