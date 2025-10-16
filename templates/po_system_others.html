@@ -90,6 +90,16 @@
       <section id="pr-section">
         <!-- Generate PR Form -->
         <div id="generate-pr-section">
+          <!-- Global loading overlay for async processes -->
+          <div id="global-loading" class="loading-overlay">
+            <div class="loading-card">
+              <div class="loading-spinner"></div>
+              <div>
+                <div style="font-weight:600; color:#111827;">Processing…</div>
+                <div style="font-size:12px; color:#6b7280;">Fetching Item Details...</div>
+              </div>
+            </div>
+          </div>
           <form id="PRForm" action="{{ url_for('pr_requisition') }}" method="post" enctype="multipart/form-data" class="pr-form">
           <div class="flex items-center justify-between mb-4">
             <h2 class="pr-heading">Initiate a New Purchase Request</h2>
@@ -220,6 +230,11 @@
             <div class="form-group full-width">
               <label for="pr-num_items">Number of Items</label>
               <input id="pr-num_items" name="number_of_items" type="number" min="1" value="1" required>
+            </div>
+            <div class="form-group full-width">
+              <label for="pr-items-excel">Upload Items (Excel)</label>
+              <input id="pr-items-excel" type="file" accept=".xlsx,.xls">
+              <small class="text-gray-500">Upload an Excel file to auto-fill item details.</small>
             </div>
             <div class="form-group-items full-width">
               <div id="pr_items_container"></div>
