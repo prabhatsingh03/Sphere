@@ -26,6 +26,7 @@ from flask import send_file
 import logging
 from werkzeug.middleware.proxy_fix import ProxyFix
 logging.basicConfig(level=logging.INFO)
+import requests
 
 # Import database manager
 from database import db
@@ -182,6 +183,49 @@ def human_readable_size(num_bytes):
         num_bytes /= step
     return f"{num_bytes:.1f} PB"
 
+# ─── PR Items Upload & Normalization ───────────────────────────────────────────
+def _normalize_pr_item_headers(df: pd.DataFrame) -> pd.DataFrame:
+    """Map varying Excel headers into canonical PR item columns.
+
+    Canonical columns: item_name, item_description, quantity, uom
+    """
+    if df is None or df.empty:
+        return pd.DataFrame(columns=['item_name', 'item_description', 'quantity', 'uom'])
+
+    col_map = {str(c).strip().lower(): c for c in df.columns}
+
+    def pick(*keys):
+        for k in keys:
+            if k in col_map:
+                return col_map[k]
+        return None
+
+    name_col = pick('item name', 'name', 'material', 'product', 'description short', 'item')
+    desc_col = pick('item description', 'description', 'long description', 'specification', 'details')
+    qty_col  = pick('qty', 'quantity', 'qty.', 'qnty', 'units', 'no. of units')
+    uom_col  = pick('uom', 'unit', 'unit of measure', 'measurement')
+
+    normalized = pd.DataFrame()
+    normalized['item_name'] = df[name_col] if name_col and name_col in df else ''
+    normalized['item_description'] = df[desc_col] if desc_col and desc_col in df else ''
+    normalized['quantity'] = df[qty_col] if qty_col and qty_col in df else ''
+    normalized['uom'] = df[uom_col] if uom_col and uom_col in df else ''
+
+    for col in ['item_name', 'item_description', 'quantity', 'uom']:
+        normalized[col] = normalized[col].astype(str).fillna('').str.strip()
+
+    def _to_int_like(v):
+        try:
+            fv = float(str(v).replace(',', '').strip())
+            if fv.is_integer():
+                return int(fv)
+            return fv
+        except Exception:
+            return v
+    normalized['quantity'] = normalized['quantity'].apply(_to_int_like)
+
+    return normalized
+
 def base64_urlsafe(s):
     import base64
     return base64.urlsafe_b64encode(s.encode('utf-8')).decode('ascii')
@@ -310,6 +354,181 @@ def require_admin(f):
         return f(*args, **kwargs)
     decorated_function.__name__ = f.__name__
     return decorated_function
+
+# PR items upload route placed AFTER require_auth so decorator is defined
+@app.route('/api/pr_upload_items', methods=['POST'])
+@require_auth
+def pr_upload_items():
+    """Accept an Excel file of PR items, return normalized items and counts."""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'success': False, 'message': 'No file part'}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'success': False, 'message': 'No file selected'}), 400
+        if not allowed_file(file.filename):
+            return jsonify({'success': False, 'message': 'Unsupported file type'}), 400
+
+        try:
+            df_raw = pd.read_excel(file, dtype=str).fillna('')
+        except Exception as e:
+            app.logger.exception(f"PR upload: failed to read Excel: {e}")
+            return jsonify({'success': False, 'message': 'Failed to read Excel'}), 400
+
+        headers = list(df_raw.columns)
+        def _row_concat(r):
+            try:
+                return ''.join(list(map(str, r)))
+            except Exception:
+                return ''
+        df_non_empty = df_raw[~(df_raw.apply(_row_concat, axis=1).str.strip() == '')]
+
+        normalized = _normalize_pr_item_headers(df_non_empty)
+        keep_mask = (normalized['item_name'].astype(str).str.strip() != '') | \
+                    (normalized['item_description'].astype(str).str.strip() != '')
+        normalized = normalized[keep_mask]
+
+        # Build raw rows aligned to normalized indices for Gemini context
+        raw_rows = []
+        for idx in normalized.index:
+            try:
+                raw_rows.append({h: str(df_non_empty.at[idx, h]) for h in headers})
+            except Exception:
+                raw_rows.append({})
+
+        # Generate descriptions via Gemini (exclude common non-desc fields)
+        excluded = {k.lower() for k in ['item name','item','name','quantity','qty','qty.','unit','uom','s.no','sno','s no','s.no.','sl no','sr no','serial','code','id']}
+        import re as _re
+        def _norm_label(label: str) -> str:
+            return _re.sub(r'[^a-z0-9]+', '', str(label).lower())
+        excluded_norm = {_norm_label(k) for k in excluded}
+        # Whitelist of informative columns to include in description
+        allowed_labels = ['spec','item type','itemtype','size(nb)','size (nb)','size nb','size(inch)','size inch','material std','material standard']
+        allowed_norm = {_norm_label(k) for k in allowed_labels}
+
+        def gemini_generate_descriptions(rows):
+            api_key = os.getenv('GEMINI_API_KEY')
+            if not api_key:
+                return []
+            # Use a single Gemini model as requested
+            model_name = "gemini-2.0-flash"
+            base_url = "https://generativelanguage.googleapis.com/v1beta/models/"
+            def call_model(model_name, body):
+                url = f"{base_url}{model_name}:generateContent?key={api_key}"
+                try:
+                    app.logger.info(f"[Gemini] Calling model: {model_name} -> {url}")
+                except Exception:
+                    pass
+                r = requests.post(url, json=body, timeout=30)
+                if r.status_code == 404:
+                    raise FileNotFoundError("model_not_found")
+                r.raise_for_status()
+                return r
+            outputs = []
+            for start in range(0, len(rows), 20):
+                chunk = rows[start:start+20]
+                compact_rows = []
+                for r in chunk:
+                    compact = {}
+                    # Prefer allowed labels if present
+                    for k, v in r.items():
+                        if not str(v).strip():
+                            continue
+                        nk = _norm_label(k)
+                        if nk in allowed_norm:
+                            compact[k] = v
+                    # If nothing captured, include any non-excluded labels
+                    if not compact:
+                        for k, v in r.items():
+                            if not str(v).strip():
+                                continue
+                            nk = _norm_label(k)
+                            if nk in excluded_norm:
+                                continue
+                            compact[k] = v
+                    compact_rows.append(compact)
+                prompt = (
+                    "You generate Purchase Requisition item descriptions. "
+                    "For each JSON object provided, produce ONE concise line that clearly combines key attributes. "
+                    "Always include column names with their values in 'Label: Value' pairs where useful. "
+                    "Prefer a compact format like 'Item Type: Valve; SPEC: ASTM A105; SIZE(NB): 50 NB; SIZE(inch): 2\"; Material STD: SCH 40'. "
+                    "Exclude quantity, unit/UOM, and serial numbers (S.No). Write technical but readable text. "
+                    "Return ONLY a JSON array of strings in the same order as input, with no extra text."
+                )
+                payload = {"contents": [{"parts": [{"text": prompt}, {"text": "\nINPUT_JSON:\n" + json.dumps(compact_rows, ensure_ascii=False)}]}]}
+                try:
+                    # Single call to the specified model
+                    resp = call_model(model_name, payload)
+                    data = resp.json()
+                    text = ""
+                    candidates = (data.get("candidates") or [])
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        if parts:
+                            text = parts[0].get("text", "")
+                    descs = []
+                    try:
+                        parsed = json.loads(text)
+                        if isinstance(parsed, list):
+                            descs = [str(x) if x is not None else '' for x in parsed]
+                    except Exception:
+                        descs = []
+                    if len(descs) != len(chunk):
+                        descs = (descs + [''] * len(chunk))[:len(chunk)]
+                    outputs.extend(descs)
+                except Exception as e:
+                    app.logger.warning(f"Gemini description batch failed: {e}")
+                    outputs.extend([''] * len(chunk))
+            return outputs
+
+        gemini_descs = gemini_generate_descriptions(raw_rows)
+
+        items = []
+        for i, (_, row) in enumerate(normalized.iterrows()):
+            desc = str(row.get('item_description', '')).strip()
+            if not desc and i < len(gemini_descs):
+                desc = gemini_descs[i].strip()
+            if not desc:
+                # Fallback: include labels with values in a compact 'Label: Value' style
+                pairs = []
+                try:
+                    source = raw_rows[i]
+                    # Prefer allowed labels
+                    for k, v in source.items():
+                        if not v or v.strip() == '':
+                            continue
+                        nk = _norm_label(k)
+                        if nk in allowed_norm:
+                            pairs.append(f"{k}: {v.strip()}")
+                    # If still empty, include any non-excluded labels
+                    if not pairs:
+                        for k, v in source.items():
+                            if not v or v.strip() == '':
+                                continue
+                            nk = _norm_label(k)
+                            if nk in excluded_norm:
+                                continue
+                            pairs.append(f"{k}: {v.strip()}")
+                except Exception:
+                    pass
+                desc = '; '.join(pairs)
+
+            items.append({
+                'item_name': str(row.get('item_name', '')).strip(),
+                'item_description': desc,
+                'quantity': row.get('quantity', ''),
+                'uom': str(row.get('uom', '')).strip(),
+            })
+
+        return jsonify({
+            'success': True,
+            'headers': headers,
+            'num_items': len(items),
+            'items': items,
+        })
+    except Exception as e:
+        app.logger.exception(f"PR upload error: {e}")
+        return jsonify({'success': False, 'message': 'Unexpected server error'}), 500
 
 def require_permission(permission):
     """Decorator to require specific permission"""
