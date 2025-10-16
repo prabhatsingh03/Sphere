@@ -319,8 +319,10 @@ if (clientSelect && addClientBtn) {
            poSel.appendChild(poOpt);
            poSel.value = data.project_number;
          }
-         
-         closeModal('modal-add-project');
+        
+        closeModal('modal-add-project');
+        // Ensure all UI lists and dependent data refresh
+        window.location.reload();
        })
        .catch(err => {
          console.error('Fetch error:', err);
@@ -815,6 +817,73 @@ if (filtersForm) {
         fetchProjectDetails(this.value.trim());
       });
     }
+
+    // Excel upload for PR items → auto-fill
+    const prItemsExcel = document.getElementById('pr-items-excel');
+    const globalLoading = document.getElementById('global-loading');
+    if (prItemsExcel) {
+      prItemsExcel.addEventListener('change', async function() {
+        const file = this.files && this.files[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+          if (globalLoading) globalLoading.style.display = 'flex';
+          const resp = await fetch('/api/pr_upload_items', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          });
+          const json = await resp.json();
+          if (!json.success) {
+            alert(json.message || 'Failed to parse Excel.');
+            return;
+          }
+          const num = parseInt(json.num_items || 0, 10);
+          if (Number.isFinite(num) && num > 0) {
+            prNumItemsInput.value = String(num);
+            renderPRItems();
+            // Fill fields
+            json.items.forEach((it, idx) => {
+              const i = idx + 1;
+              const nameEl = document.getElementById(`pr_item_${i}_name`);
+              const descEl = document.getElementById(`pr_item_${i}_description`);
+              const qtyEl  = document.getElementById(`pr_item_${i}_unit_items`);
+              const uomEl  = document.getElementById(`pr_item_${i}_measurement`);
+              if (nameEl) nameEl.value = it.item_name || '';
+              if (descEl) descEl.value = it.item_description || '';
+              if (qtyEl && (it.quantity || it.quantity === 0)) qtyEl.value = it.quantity;
+              if (uomEl && it.uom) {
+                const val = String(it.uom).trim();
+                // Set existing option if matches (case-insensitive), else add custom
+                let matched = false;
+                for (const opt of Array.from(uomEl.options)) {
+                  if (opt.text.trim().toLowerCase() === val.toLowerCase()) {
+                    uomEl.value = opt.value;
+                    matched = true;
+                    break;
+                  }
+                }
+                if (!matched && val) {
+                  const opt = document.createElement('option');
+                  opt.value = val;
+                  opt.textContent = val;
+                  uomEl.appendChild(opt);
+                  uomEl.value = val;
+                }
+              }
+            });
+          } else {
+            alert('No items detected in the uploaded Excel.');
+          }
+        } catch (e) {
+          console.error('pr-items-excel upload error', e);
+          alert('Error uploading Excel.');
+        } finally {
+          if (globalLoading) globalLoading.style.display = 'none';
+        }
+      });
+    }
  
      function renderPRItems() {
        prItemsContainer.innerHTML = "";
@@ -831,10 +900,10 @@ if (filtersForm) {
                <label for="pr_item_${i}_description">Item Description</label>
                <textarea id="pr_item_${i}_description" name="item_${i}_description" rows="2" required></textarea>
              </div>
-             <div class="items-row">
+            <div class="items-row">
                <div class="form-group">
                  <label for="pr_item_${i}_unit_items">QTY</label>
-                 <input id="pr_item_${i}_unit_items" name="item_${i}_unit_items" type="number" min="1" value="1" required>
+                <input id="pr_item_${i}_unit_items" name="item_${i}_unit_items" type="number" step="any" min="0" value="1" required>
                </div>
                <div class="form-group">
                  <label for="pr_item_${i}_measurement">UOM</label>
